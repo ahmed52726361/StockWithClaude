@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Inventory.Orders.Invoices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Inventory.Payements
     internal class CryptoPayment : Payment, IRefunded
     {
 
-        public CryptoPayment(decimal amount, DateTime date) : base(amount, date)
+        public CryptoPayment(int id, IInvoice invoice, decimal amount, DateTime date) : base(id, invoice, amount, date)
         {
 
         }

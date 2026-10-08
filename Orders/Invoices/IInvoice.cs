@@ -8,5 +8,7 @@ namespace Inventory.Orders.Invoices
 {
     internal interface IInvoice
     {
+        int InvoiceId { get; }
+        decimal InvoiceAmount { get; }
     }
 }

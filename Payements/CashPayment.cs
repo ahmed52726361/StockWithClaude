@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Inventory.Orders.Invoices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace Inventory.Payements
 {
     internal class CashPayment : Payment
     {
-        public CashPayment(decimal amount, DateTime date) : base(amount, date)
+        public CashPayment(int id, IInvoice invoice, decimal amount, DateTime date) : base(id, invoice, amount, date)
         {
             
         }

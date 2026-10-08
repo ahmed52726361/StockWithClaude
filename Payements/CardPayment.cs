@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Inventory.Orders.Invoices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Inventory.Payements
 
 
 
-        public CardPayment(string last4digits ,decimal amount, DateTime date) : base(amount, date)
+        public CardPayment(string last4digits, int id, IInvoice invoice, decimal amount, DateTime date) : base(id, invoice, amount, date)
         {
             if (last4digits.Count()<4)
             {

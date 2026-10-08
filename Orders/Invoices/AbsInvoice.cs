@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Inventory.Orders.Invoices
 {
-    internal abstract class AbsInvoice<TContact> where TContact : Contact
+    internal abstract class AbsInvoice<TContact> : IInvoice where TContact : Contact
     {
         private readonly List<AbsOrderLine<TContact>> _lines = new List<AbsOrderLine<TContact>>();
 
@@ -62,7 +62,7 @@ namespace Inventory.Orders.Invoices
         }
         public void MarkCanceled()
         {
-            if (CurrentStatus != Status.Shipped ||CurrentStatus!=Status.Pending)
+            if (CurrentStatus != Status.Completed)
             {
                 throw new InvalidOperationException($"Cannot cancele an invoice with status {CurrentStatus}.");
             }
