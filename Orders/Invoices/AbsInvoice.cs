@@ -44,6 +44,10 @@ namespace Inventory.Orders.Invoices
             {
                 throw new ArgumentNullException(nameof(line));
             }
+            else if (line.Invoice!=this)
+            {
+                throw new ArgumentNullException(nameof(line));
+            }
             _lines.Add(line);
         }
 
@@ -62,7 +66,7 @@ namespace Inventory.Orders.Invoices
         }
         public void MarkCanceled()
         {
-            if (CurrentStatus != Status.Completed)
+            if (CurrentStatus != Status.Shipped && CurrentStatus != Status.Pending)
             {
                 throw new InvalidOperationException($"Cannot cancele an invoice with status {CurrentStatus}.");
             }
