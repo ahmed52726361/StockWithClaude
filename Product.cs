@@ -10,7 +10,7 @@ namespace Inventory
 {
     internal class Product:ISummarizable,IHasId
     {
-        public int ProductId { get; }
+        public int ProductId { get; private set; }
         public int Id=>ProductId;
         private  short _StockQty; 
         public string Name {  get; set; }
@@ -38,6 +38,18 @@ namespace Inventory
             Name = name;
             Price = price;
             StockQty = quantity;
+        }
+        public void SetId(int id)
+        {
+            if (id<=0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), "Id should be positive");
+            }
+            else if (ProductId>0)
+            {
+                throw new ArgumentException("Product already added");
+            }
+            ProductId = id;
         }
         public void AddStock(short QuantityToAdd)
         {

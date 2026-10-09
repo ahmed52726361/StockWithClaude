@@ -22,8 +22,8 @@ namespace Inventory.Orders.Lines
         {
             Invoice = invoice ?? throw new ArgumentNullException(nameof(invoice));
             Product = product ?? throw new ArgumentNullException(nameof(product));
-            Qty = qty;
-            OrderPrice = price;
+            Qty = qty <= 0 ? throw new ArgumentOutOfRangeException(nameof(qty), "Quantity should be positive") : qty;
+            OrderPrice = price <= 0 ? throw new ArgumentOutOfRangeException(nameof(price), "Price should be positive") : price;
         }
     }
 }

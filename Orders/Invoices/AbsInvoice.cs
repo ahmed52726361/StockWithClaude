@@ -48,7 +48,7 @@ namespace Inventory.Orders.Invoices
             }
             else if (line.Invoice!=this)
             {
-                throw new ArgumentNullException(nameof(line));
+                throw new ArgumentException("You can't add a record line that belongs to another invoice.");
             }
             _lines.Add(line);
         }
