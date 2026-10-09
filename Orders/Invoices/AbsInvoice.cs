@@ -1,11 +1,12 @@
 ﻿using Inventory.Contacts;
 using Inventory.Orders.Lines;
+using Inventory.Services;
 using System;
 using System.Collections.Generic;
 
 namespace Inventory.Orders.Invoices
 {
-    internal abstract class AbsInvoice<TContact> : IInvoice where TContact : Contact
+    internal abstract class AbsInvoice<TContact> : IInvoice, IHasId where TContact : Contact
     {
         private readonly List<AbsOrderLine<TContact>> _lines = new List<AbsOrderLine<TContact>>();
 
@@ -29,9 +30,10 @@ namespace Inventory.Orders.Invoices
         public enum Status { Pending, Shipped, Completed, Cancelled }
         public Status CurrentStatus { get; private set; }
 
-        public AbsInvoice(int invoiceId, TContact contact, DateTime invoiceDate)
+        public int Id => InvoiceId;
+
+        public AbsInvoice( TContact contact, DateTime invoiceDate)
         {
-            InvoiceId = invoiceId;
             Contact = contact ?? throw new ArgumentNullException(nameof(contact));
             InvoiceDate = invoiceDate;
             CurrentStatus = Status.Pending;

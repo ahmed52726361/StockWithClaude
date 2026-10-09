@@ -9,7 +9,7 @@ namespace Inventory.Orders.Invoices
 {
     internal class PurchaseInvoice:AbsInvoice<Supplier>
     {
-        public PurchaseInvoice(int invoiceId,Supplier supplier,DateTime invoiceDate) : base(invoiceId,supplier,invoiceDate)
+        public PurchaseInvoice(Supplier supplier,DateTime invoiceDate) : base(supplier,invoiceDate)
         {
 
         }

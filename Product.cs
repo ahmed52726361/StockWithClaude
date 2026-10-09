@@ -33,9 +33,8 @@ namespace Inventory
                 }
             }
         }
-        public Product(int id,string name, decimal price, short quantity)
+        public Product(string name, decimal price, short quantity)
         {
-            ProductId = id;
             Name = name;
             Price = price;
             StockQty = quantity;

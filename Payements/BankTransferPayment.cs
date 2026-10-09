@@ -10,7 +10,7 @@ namespace Inventory.Payements
     internal class BankTransferPayment: Payment,IRefunded
     {
 
-        public BankTransferPayment( int id,IInvoice invoice,decimal amount, DateTime date):base(id,invoice,amount,date)
+        public BankTransferPayment( IInvoice invoice,decimal amount, DateTime date):base(invoice,amount,date)
         {
         }
 

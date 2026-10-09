@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Inventory.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace Inventory.Contacts
 {
-    internal abstract class Contact:ISummarizable
+    internal abstract class Contact:IHasId, ISummarizable
     {
         private string _Name= string.Empty;
         private string _Email= string.Empty;
+        public int ContactID { get; }
         public string Name
         {
             get { return _Name; }
@@ -42,6 +44,9 @@ namespace Inventory.Contacts
             }
         }
         public string PhoneNumber { get; set; }
+
+        public int Id => ContactID;
+
         public Contact(string name, string address, string email, string phoneNumber)
         {
               Name = name;

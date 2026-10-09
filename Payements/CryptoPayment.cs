@@ -10,7 +10,7 @@ namespace Inventory.Payements
     internal class CryptoPayment : Payment, IRefunded
     {
 
-        public CryptoPayment(int id, IInvoice invoice, decimal amount, DateTime date) : base(id, invoice, amount, date)
+        public CryptoPayment(IInvoice invoice, decimal amount, DateTime date) : base(invoice, amount, date)
         {
 
         }

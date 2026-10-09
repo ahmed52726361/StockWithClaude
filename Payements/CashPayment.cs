@@ -9,7 +9,7 @@ namespace Inventory.Payements
 {
     internal class CashPayment : Payment
     {
-        public CashPayment(int id, IInvoice invoice, decimal amount, DateTime date) : base(id, invoice, amount, date)
+        public CashPayment(IInvoice invoice, decimal amount, DateTime date) : base(invoice, amount, date)
         {
             
         }

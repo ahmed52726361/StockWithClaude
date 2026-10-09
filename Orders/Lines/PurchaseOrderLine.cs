@@ -14,7 +14,7 @@ namespace Inventory.Orders.Lines
 
     internal class PurchaseOrderLine:AbsOrderLine<Supplier>
     {
-        public PurchaseOrderLine(int PurchaseOrderLineID, PurchaseInvoice purchaseInvoice,Product product,int ordreQty,decimal orderPrice) : base(PurchaseOrderLineID, purchaseInvoice, product, ordreQty, orderPrice)
+        public PurchaseOrderLine( PurchaseInvoice purchaseInvoice,Product product,int ordreQty,decimal orderPrice) : base( purchaseInvoice, product, ordreQty, orderPrice)
         {
 
         }

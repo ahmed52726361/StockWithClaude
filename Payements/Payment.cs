@@ -30,9 +30,8 @@ namespace Inventory.Payements
 
         public int Id => PaymentId;
 
-        public Payment(int paymentId, IInvoice invoice, decimal amount, DateTime date)
+        public Payment(IInvoice invoice, decimal amount, DateTime date)
         {
-            PaymentId = paymentId;
             Invoice = invoice ?? throw new ArgumentNullException(nameof(invoice));
             Amount = amount;
             Date = date;

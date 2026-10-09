@@ -13,7 +13,7 @@ namespace Inventory.Payements
 
 
 
-        public CardPayment(string last4digits, int id, IInvoice invoice, decimal amount, DateTime date) : base(id, invoice, amount, date)
+        public CardPayment(string last4digits, IInvoice invoice, decimal amount, DateTime date) : base(invoice, amount, date)
         {
             if (last4digits.Count()<4)
             {
