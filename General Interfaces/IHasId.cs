@@ -11,4 +11,6 @@ namespace Inventory.Services
         int Id { get; }
         void SetId(int id);
     }
+
+
 }

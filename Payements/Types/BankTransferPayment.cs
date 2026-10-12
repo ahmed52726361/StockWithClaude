@@ -1,29 +1,35 @@
-﻿using Inventory.Orders.Invoices.Interfaces;
+﻿
+using Inventory.Orders.Invoices.Interfaces;
 using Inventory.Payements.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Inventory.Payements.Types
 {
-    internal class BankTransferPayment: Payment,IRefunded
+    internal class BankTransferPayment : Payment, IRefunded
     {
-
-        public BankTransferPayment( IInvoice invoice,decimal amount, DateTime date):base(invoice,amount,date)
+        public BankTransferPayment(
+            IInvoice invoice,
+            decimal amount,
+            DateTime date)
+            : base(invoice, amount, date)
         {
-
         }
 
         public override string Pay()
         {
-            return ProcessPayment($"Waiting for transfer confirmation: {Amount}");
+            return MarkPending(
+                $"Bank transfer initiated for {Amount}. Waiting for confirmation.");
+        }
+
+        public string ConfirmTransfer()
+        {
+            return ConfirmPendingPayment(
+                $"Bank transfer confirmed: {Amount}.");
         }
 
         public string Refund()
         {
-            return ProcessRefund($"The bank succed to refend {Amount}");
+            return ProcessRefund(
+                $"Refund initiated for {Amount}.");
         }
     }
 }

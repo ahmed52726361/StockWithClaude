@@ -1,55 +1,53 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Inventory.Services
 {
-    internal class Repository<T> : IRepository<T> where T : IHasId
+    internal class InMemoryRepository<T> : IInMemoryRepository<T>
+        where T : class, IHasId
     {
-        private List<T> _items=new List<T>();
-        private Dictionary<int, T> _itemsById = new Dictionary<int, T>();
+        private readonly List<T> _items = new();
+        private readonly Dictionary<int, T> _itemsById = new();
+
         public void Add(T item)
         {
-            if (item==null)
+            ArgumentNullException.ThrowIfNull(item);
+
+            if (item.Id <= 0)
             {
-                throw new ArgumentNullException(nameof(item));
+                throw new InvalidOperationException(
+                    "The item must have an ID before being added.");
             }
-            _items.Add(item);
+
+            if (_itemsById.ContainsKey(item.Id))
+            {
+                throw new InvalidOperationException(
+                    $"An item with ID {item.Id} already exists.");
+            }
+
+            // Validate first, then update both collections.
             _itemsById.Add(item.Id, item);
-        }
-        public T Find(Predicate<T> predicate)
-        {
-            foreach (T item in _items)
-            {
-                if (predicate(item))
-                {
-                    return item;
-                }
-            }
-            return default;
-        }
-        public List<T> FindAll(Predicate<T> predicate)
-        {
-            List<T> items = new List<T>();
-            foreach(T item in _items)
-            {
-                if (predicate(item))
-                {
-                    items.Add(item);
-                }
-            }
-            return items;
-        }
-        public T GetById(int id)
-        {
-            if (_itemsById.TryGetValue(id,out T value))
-            {
-                return value;
-            }
-            return default;
+            _items.Add(item);
         }
 
+        public T? GetById(int id)
+        {
+            return _itemsById.TryGetValue(id, out T? item)
+                ? item
+                : null;
+        }
+
+        public T? Find(Predicate<T> predicate)
+        {
+            ArgumentNullException.ThrowIfNull(predicate);
+            return _items.Find(predicate);
+        }
+
+        public List<T> FindAll(Predicate<T> predicate)
+        {
+            ArgumentNullException.ThrowIfNull(predicate);
+            return _items.FindAll(predicate);
+        }
     }
 }

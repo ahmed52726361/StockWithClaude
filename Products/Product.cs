@@ -1,4 +1,5 @@
-﻿using Inventory.Services;
+﻿using Inventory.General_Interfaces;
+using Inventory.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,81 +7,120 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
+
+using Inventory.Products;
+
 namespace Inventory.Products
 {
-    internal class Product:ISummarizable,IHasId
+    internal class Product : ISummarizable, IReceivesDatabaseId
     {
-        public int ProductId { get; private set; }
-        public int Id=>ProductId;
-        private  short _StockQty; 
-        public string Name {  get; set; }
-        public decimal Price { get; set; }
-        public short StockQty
+        public int Id { get; private set; }
+
+        public string Name { get; private set; }
+
+        public decimal Price { get; private set; }
+
+        public int StockQty { get; private set; }
+
+        public Product(string name, decimal price, int quantity)
         {
-            get
+            Name = ValidateName(name);
+            Price = ValidatePrice(price);
+
+            if (quantity < 0)
             {
-                return _StockQty;
+                throw new ArgumentOutOfRangeException(
+                    nameof(quantity),
+                    "Stock cannot be negative.");
             }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(StockQty),"Stock can't be negative");
-                }
-                else
-                {
-                    _StockQty=value;
-                }
-            }
-        }
-        public Product(string name, decimal price, short quantity)
-        {
-            Name = name;
-            Price = price;
+
             StockQty = quantity;
         }
+
         public void SetId(int id)
         {
-            if (id<=0)
+            if (id <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(id), "Id should be positive");
+                throw new ArgumentOutOfRangeException(
+                    nameof(id), "ID must be positive.");
             }
-            else if (ProductId>0)
+
+            if (Id != 0)
             {
-                throw new ArgumentException("Product already added");
+                throw new InvalidOperationException(
+                    "The product already has an ID.");
             }
-            ProductId = id;
+
+            Id = id;
         }
-        public void AddStock(short QuantityToAdd)
+
+        public void Rename(string name)
         {
-            if (QuantityToAdd<=0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(QuantityToAdd), "Quantity to add must be greater than zero.");
-            }
-            else
-            {
-                StockQty += QuantityToAdd;
-            }
+            Name = ValidateName(name);
         }
-        public void Sale(short QtyToSell)
+
+        public void ChangePrice(decimal price)
         {
-            if (QtyToSell<=0)
+            Price = ValidatePrice(price);
+        }
+
+        public void AddStock(int quantity)
+        {
+            if (quantity <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(QtyToSell), "Quantity to Sale must be greater than zero.");
-            }else if (QtyToSell>StockQty)
-            {
-                throw new ArgumentOutOfRangeException(nameof(QtyToSell), "cannot exceed available stock");
+                throw new ArgumentOutOfRangeException(
+                    nameof(quantity),
+                    "Quantity must be positive.");
             }
-            else
+
+            StockQty = checked(StockQty + quantity);
+        }
+
+        public void Sale(int quantity)
+        {
+            if (quantity <= 0)
             {
-                StockQty -= QtyToSell;
+                throw new ArgumentOutOfRangeException(
+                    nameof(quantity),
+                    "Quantity must be positive.");
             }
+
+            if (quantity > StockQty)
+            {
+                throw new InvalidOperationException(
+                    "Insufficient stock.");
+            }
+
+            StockQty -= quantity;
         }
 
         public string GetSummary()
         {
-            return $"{Name} have {StockQty} in stock";
+            return $"{Name} has {StockQty} in stock.";
+        }
 
+        private static string ValidateName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException(
+                    "Product name cannot be empty.",
+                    nameof(name));
+            }
+
+            return name.Trim();
+        }
+
+        private static decimal ValidatePrice(decimal price)
+        {
+            if (price <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(price),
+                    "Product price must be positive.");
+            }
+
+            return price;
         }
     }
 }

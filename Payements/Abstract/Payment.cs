@@ -1,14 +1,21 @@
-﻿using Inventory.Orders.Invoices.Interfaces;
+﻿using Inventory.General_Interfaces;
+using Inventory.Orders.Invoices.Interfaces;
 using Inventory.Services;
 using System;
 
 namespace Inventory.Payements.Abstract
 {
-    internal abstract class Payment : IHasId
+    internal abstract class Payment : IReceivesDatabaseId
     {
         public int Id {get; private set;}
         private decimal _amount;
-        public enum PaymentStatus { Unpaid, Paid, Refunded }
+        public enum PaymentStatus
+        {
+            Unpaid,
+            Pending,
+            Paid,
+            Refunded
+        }
         public PaymentStatus Status { get; protected set; } = PaymentStatus.Unpaid;
         public decimal Amount
         {
@@ -43,34 +50,49 @@ namespace Inventory.Payements.Abstract
 
         public abstract string Pay();
 
-        protected string ProcessPayment(string msg)
+
+        protected string ProcessPayment(string successMessage)
         {
-            if (Status == PaymentStatus.Unpaid)
+            if (Status != PaymentStatus.Unpaid)
             {
-                Status = PaymentStatus.Paid;
-                return msg;
+                return $"Cannot pay a payment with status {Status}.";
             }
-            else
+
+            Status = PaymentStatus.Paid;
+            return successMessage;
+        }
+
+        protected string MarkPending(string message)
+        {
+            if (Status != PaymentStatus.Unpaid)
             {
-                return "Payments already paid";
+                return $"Cannot initiate a transfer with status {Status}.";
             }
+
+            Status = PaymentStatus.Pending;
+            return message;
+        }
+
+        protected string ConfirmPendingPayment(string message)
+        {
+            if (Status != PaymentStatus.Pending)
+            {
+                return $"Cannot confirm a payment with status {Status}.";
+            }
+
+            Status = PaymentStatus.Paid;
+            return message;
         }
 
         protected string ProcessRefund(string successMessage)
         {
-            if (Status == PaymentStatus.Paid)
+            if (Status != PaymentStatus.Paid)
             {
-                Status = PaymentStatus.Refunded;
-                return successMessage;
+                return $"Cannot refund a payment with status {Status}.";
             }
-            else if (Status == PaymentStatus.Unpaid)
-            {
-                return "was never paid.";
-            }
-            else
-            {
-                return "already refunded.";
-            }
+
+            Status = PaymentStatus.Refunded;
+            return successMessage;
         }
 
         public void SetId(int id)
@@ -81,7 +103,8 @@ namespace Inventory.Payements.Abstract
             }
             else if (Id > 0)
             {
-                throw new ArgumentException("Product already added");
+                throw new InvalidOperationException(
+                    "The payment already has an ID.");
             }
             Id = id;
         }

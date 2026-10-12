@@ -66,7 +66,8 @@ namespace Inventory.Contacts.Abstract
             }
             else if (Id > 0)
             {
-                throw new ArgumentException("Record already added");
+                throw new InvalidOperationException(
+                    "The record already has an ID.");
             }
             Id = id;
 

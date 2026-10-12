@@ -1,4 +1,5 @@
 ﻿using Inventory.Contacts.Abstract;
+using Inventory.General_Interfaces;
 using Inventory.Orders.Invoices.Interfaces;
 using Inventory.Orders.Lines.Abstract;
 using Inventory.Services;
@@ -7,7 +8,9 @@ using System.Collections.Generic;
 
 namespace Inventory.Orders.Invoices.Abstract
 {
-    internal abstract class AbsInvoice<TContact> : IInvoice, IHasId where TContact : AbsContact
+    internal abstract class AbsInvoice<TContact>
+        : IInvoice, IReceivesDatabaseId
+        where TContact : AbsContact
     {
         private readonly List<AbsOrderLine<TContact>> _lines = new List<AbsOrderLine<TContact>>();
 
@@ -92,7 +95,8 @@ namespace Inventory.Orders.Invoices.Abstract
             }
             else if (Id > 0)
             {
-                throw new ArgumentException("Record already added");
+                throw new InvalidOperationException(
+                    "The record already has an ID.");
             }
             Id = id;
         }
