@@ -1,21 +1,22 @@
-﻿using Inventory.Contacts;
+﻿using Inventory.Contacts.Abstract;
+using Inventory.Orders.Invoices.Abstract;
+using Inventory.Products;
 using Inventory.Services;
 using System;
 
-namespace Inventory.Orders.Lines
+namespace Inventory.Orders.Lines.Abstract
 {
-    internal abstract class AbsOrderLine<TContact> :IHasId where TContact : Contact
+    internal abstract class AbsOrderLine<TContact> :IHasId where TContact : AbsContact
     {
-        public int OrderID { get; }
-        public Invoices.AbsInvoice<TContact> Invoice { get; }
+        public int Id {  get; private set; }
+        public AbsInvoice<TContact> Invoice { get; }
         public Product Product { get; }
         public int Qty { get; }
         public decimal OrderPrice { get; }
 
-        public int Id => OrderID;
 
         public AbsOrderLine(
-            Invoices.AbsInvoice<TContact> invoice,
+            AbsInvoice<TContact> invoice,
             Product product,
             int qty,
             decimal price)
@@ -24,6 +25,19 @@ namespace Inventory.Orders.Lines
             Product = product ?? throw new ArgumentNullException(nameof(product));
             Qty = qty <= 0 ? throw new ArgumentOutOfRangeException(nameof(qty), "Quantity should be positive") : qty;
             OrderPrice = price <= 0 ? throw new ArgumentOutOfRangeException(nameof(price), "Price should be positive") : price;
+        }
+
+        public void SetId(int id)
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), "Id should be positive");
+            }
+            else if (Id > 0)
+            {
+                throw new ArgumentException("Record already added");
+            }
+            Id = id;
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using Inventory.Orders.Invoices;
+﻿using Inventory.Orders.Invoices.Interfaces;
 using Inventory.Services;
 using System;
 
-namespace Inventory.Payements
+namespace Inventory.Payements.Abstract
 {
     internal abstract class Payment : IHasId
     {
-        public int PaymentId { get; }
+        public int Id {get; private set;}
         private decimal _amount;
         public enum PaymentStatus { Unpaid, Paid, Refunded }
         public PaymentStatus Status { get; protected set; } = PaymentStatus.Unpaid;
@@ -28,7 +28,6 @@ namespace Inventory.Payements
         public DateTime Date { get; private set; }
         public IInvoice Invoice { get; }
 
-        public int Id => PaymentId;
 
         public Payment(IInvoice invoice, decimal amount, DateTime date)
         {
@@ -72,6 +71,19 @@ namespace Inventory.Payements
             {
                 return "already refunded.";
             }
+        }
+
+        public void SetId(int id)
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), "Id should be positive");
+            }
+            else if (Id > 0)
+            {
+                throw new ArgumentException("Product already added");
+            }
+            Id = id;
         }
     }
 }

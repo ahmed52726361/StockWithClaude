@@ -1,5 +1,7 @@
 ﻿using Inventory.Contacts;
 using Inventory.Orders.Invoices;
+using Inventory.Orders.Lines.Abstract;
+using Inventory.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Inventory.Contacts
+namespace Inventory.Contacts.Abstract
 {
-    internal abstract class Contact: ISummarizable
+    internal abstract class AbsContact : ISummarizable, IHasId
     {
         private string _Name= string.Empty;
         private string _Email= string.Empty;
@@ -44,8 +44,9 @@ namespace Inventory.Contacts
         }
         public string PhoneNumber { get; set; }
 
+        public int Id {  get;private set; }
 
-        public Contact(string name, string address, string email, string phoneNumber)
+        public AbsContact(string name, string address, string email, string phoneNumber)
         {
               Name = name;
             Address = address;
@@ -55,6 +56,20 @@ namespace Inventory.Contacts
         public virtual string GetSummary()
         {
             return $"{Name} - {Email}";
+        }
+
+        public void SetId(int id)
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), "Id should be positive");
+            }
+            else if (Id > 0)
+            {
+                throw new ArgumentException("Record already added");
+            }
+            Id = id;
+
         }
     }
 }

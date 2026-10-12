@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Inventory
+namespace Inventory.Products
 {
     internal class Product:ISummarizable,IHasId
     {
@@ -79,7 +79,7 @@ namespace Inventory
 
         public string GetSummary()
         {
-            return $"{this.Name} have {this.StockQty} in stock";
+            return $"{Name} have {StockQty} in stock";
 
         }
     }

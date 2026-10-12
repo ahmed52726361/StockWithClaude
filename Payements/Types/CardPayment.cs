@@ -1,11 +1,12 @@
-﻿using Inventory.Orders.Invoices;
+﻿using Inventory.Orders.Invoices.Interfaces;
+using Inventory.Payements.Abstract;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Inventory.Payements
+namespace Inventory.Payements.Types
 {
     internal class CardPayment:Payment,IRefunded
     {
@@ -29,7 +30,7 @@ namespace Inventory.Payements
 
         public override string Pay()
         {
-            return ProcessPayment($"Charging card ending {this.Last4digits}: {this.Amount}");
+            return ProcessPayment($"Charging card ending {Last4digits}: {Amount}");
         }
         public override string ReceiptText()
         {

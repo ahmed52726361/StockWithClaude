@@ -1,16 +1,17 @@
-﻿using Inventory.Contacts;
-using Inventory.Orders.Lines;
+﻿using Inventory.Contacts.Abstract;
+using Inventory.Orders.Invoices.Interfaces;
+using Inventory.Orders.Lines.Abstract;
 using Inventory.Services;
 using System;
 using System.Collections.Generic;
 
-namespace Inventory.Orders.Invoices
+namespace Inventory.Orders.Invoices.Abstract
 {
-    internal abstract class AbsInvoice<TContact> : IInvoice, IHasId where TContact : Contact
+    internal abstract class AbsInvoice<TContact> : IInvoice, IHasId where TContact : AbsContact
     {
         private readonly List<AbsOrderLine<TContact>> _lines = new List<AbsOrderLine<TContact>>();
 
-        public int InvoiceId { get; }
+        public int Id {  get; private set; }
         public TContact Contact { get; }
         public DateTime InvoiceDate { get; } // get-only — set once, in the constructor, never changes after
 
@@ -30,7 +31,7 @@ namespace Inventory.Orders.Invoices
         public enum Status { Pending, Shipped, Completed, Cancelled }
         public Status CurrentStatus { get; private set; }
 
-        public int Id => InvoiceId;
+        public int InvoiceId => Id;
 
         public AbsInvoice( TContact contact, DateTime invoiceDate)
         {
@@ -83,5 +84,17 @@ namespace Inventory.Orders.Invoices
             CurrentStatus = Status.Completed;
         }
 
+        public void SetId(int id)
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), "Id should be positive");
+            }
+            else if (Id > 0)
+            {
+                throw new ArgumentException("Record already added");
+            }
+            Id = id;
+        }
     }
 }
