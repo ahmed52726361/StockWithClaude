@@ -9,5 +9,6 @@ namespace Inventory.Services
     internal interface IHasId
     {
         int Id { get; }
+        void SetId(int id);
     }
 }

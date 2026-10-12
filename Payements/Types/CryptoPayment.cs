@@ -1,4 +1,4 @@
-﻿using Inventory.Orders.Invoices;
+﻿using Inventory.Orders.Invoices.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
