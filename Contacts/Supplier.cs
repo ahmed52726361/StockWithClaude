@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Inventory.Contacts
 {
-    internal class Supplier : AbsContact,IHasId
+    internal class Supplier : AbsContact
     {
         public Supplier( string name, string address, string email, string phoneNumber) : base(name, address, email, phoneNumber)
         {

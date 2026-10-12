@@ -9,7 +9,10 @@ using Inventory.Services;
 using System.Data;
 
 
-
+static void Main(string[] args)
+{
+    Console.WriteLine("Hello World");
+}
 
 
 

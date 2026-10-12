@@ -1,4 +1,5 @@
-﻿using Inventory.Services;
+﻿using Inventory.General_Interfaces;
+using Inventory.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Inventory.Contacts.Abstract
 {
-    internal abstract class AbsContact : ISummarizable, IHasId
+    internal abstract class AbsContact
+        : ISummarizable, IReceivesDatabaseId
     {
         private string _Name= string.Empty;
         private string _Email= string.Empty;
