@@ -9,10 +9,27 @@ using Inventory.Services;
 using System.Data;
 
 
-static void Main(string[] args)
+
+using Inventory.DataAccess.Database;
+using Microsoft.Data.SqlClient;
+
+try
 {
-    Console.WriteLine("Hello World");
+    using SqlConnection connection =
+        SqlConnectionFactory.CreateConnection();
+
+    connection.Open();
+
+    Console.WriteLine("Connected successfully!");
+    Console.WriteLine($"Server: {connection.DataSource}");
+    Console.WriteLine($"Database: {connection.Database}");
+}
+catch (SqlException ex)
+{
+    Console.WriteLine("Database connection failed:");
+    Console.WriteLine(ex.Message);
 }
 
+Console.ReadKey();
 
 
