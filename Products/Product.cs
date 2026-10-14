@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-using Inventory.Products;
 
 namespace Inventory.Products
 {
@@ -36,6 +35,7 @@ namespace Inventory.Products
 
             StockQty = quantity;
         }
+        public Product() { }
 
         public void SetId(int id)
         {

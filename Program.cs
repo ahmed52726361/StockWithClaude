@@ -2,34 +2,17 @@
 
 using Inventory;
 using Inventory.Contacts;
+using Inventory.DataAccess.Repositories;
 using Inventory.Orders.Invoices;
 using Inventory.Orders.Lines;
 using Inventory.Payements;
+using Inventory.Products;
 using Inventory.Services;
 using System.Data;
 
 
 
-using Inventory.DataAccess.Database;
-using Microsoft.Data.SqlClient;
-
-try
-{
-    using SqlConnection connection =
-        SqlConnectionFactory.CreateConnection();
-
-    connection.Open();
-
-    Console.WriteLine("Connected successfully!");
-    Console.WriteLine($"Server: {connection.DataSource}");
-    Console.WriteLine($"Database: {connection.Database}");
-}
-catch (SqlException ex)
-{
-    Console.WriteLine("Database connection failed:");
-    Console.WriteLine(ex.Message);
-}
-
-Console.ReadKey();
-
-
+SqlProductRepository repository = new SqlProductRepository();
+Product Fridge = new Product("Fridge", 10m, 7);
+await repository.AddAsync(Fridge);
+Console.WriteLine("Insertion completed, check database");
