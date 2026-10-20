@@ -1,18 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using Inventory;
-using Inventory.Contacts;
+﻿
 using Inventory.DataAccess.Repositories;
-using Inventory.Orders.Invoices;
-using Inventory.Orders.Lines;
-using Inventory.Payements;
 using Inventory.Products;
-using Inventory.Services;
-using System.Data;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-
-
-SqlProductRepository repository = new SqlProductRepository();
-Product Fridge = new Product("Fridge", 10m, 7);
-await repository.AddAsync(Fridge);
-Console.WriteLine("Insertion completed, check database");
+Console.WriteLine("Program started.");
+SqlProductRepository productRepository = new();
+IReadOnlyList<Product>  AllProducts=await productRepository.GetAllAsync();
+foreach (Product product in AllProducts)
+{
+    Console.WriteLine($"Id:{product.Id} Name :{product.Name} Qty:{product.StockQty} Price:{product.Price}");
+}
+Console.WriteLine("Program finished.");

@@ -100,5 +100,9 @@ namespace Inventory.Orders.Invoices.Abstract
             }
             Id = id;
         }
+        public void SetStatus(Status status)
+        {
+            CurrentStatus = status;
+        }
     }
 }
