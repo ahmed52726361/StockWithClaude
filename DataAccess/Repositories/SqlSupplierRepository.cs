@@ -1,113 +1,131 @@
-﻿using Inventory.Contacts;
+﻿
+using Inventory.Contacts;
+using Inventory.DataAccess.Database;
 using Inventory.General_Interfaces_and_abstract.General_abstract;
 using Inventory.General_Interfaces_and_abstract.Repository_Interfaces;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Inventory.DataAccess.Repositories
 {
-    internal class SqlSupplierRepository :SqlRepositoryBase<Supplier>, ISupplierRepository
+    internal class SqlSupplierRepository
+        : SqlRepositoryBase<Supplier>, ISupplierRepository
     {
+        private const string SelectQuery = @"
+            SELECT SupplierID, Name, Address, Email, PhoneNumber
+            FROM Suppliers";
+
         protected override Supplier BuildTable(SqlDataReader reader)
         {
-            string Name=(string)reader["Name"];
-            string Email = (string)reader["Email"];
-            string Address = (string)reader["Address"];
-            string PhoneNumber = (string)reader["PhoneNumber"];
-            return new Supplier(Name, Email, Address, PhoneNumber);
+            Supplier supplier = new Supplier(
+                (string)reader["Name"],
+                reader["Address"] as string ?? string.Empty,
+                reader["Email"] as string ?? string.Empty,
+                reader["PhoneNumber"] as string ?? string.Empty);
+
+            supplier.SetId((int)reader["SupplierID"]);
+
+            return supplier;
         }
+
         public async Task AddAsync(Supplier item)
         {
-            string query = @"Insert into Suppliers(Name,Address,Email,PhoneNumber)
-                            VALUES(@Name,@Address,@Email,@PhoneNumber)";
-            List<QueryParameter> parameters = new List<QueryParameter>
+            ArgumentNullException.ThrowIfNull(item);
+
+            const string query = @"
+                INSERT INTO Suppliers
+                    (Name, Address, Email, PhoneNumber)
+                VALUES
+                    (@Name, @Address, @Email, @PhoneNumber);
+                SELECT CAST(SCOPE_IDENTITY() AS int);";
+
+            List<QueryParameter> parameters = new()
             {
-                new QueryParameter("@Name",SqlDbType.NVarChar,item.Name),
-                new QueryParameter("@Address",SqlDbType.NVarChar,item.Address),
-                new QueryParameter("@Email",SqlDbType.NVarChar,item.Email),
-                new QueryParameter("@PhoneNumber",SqlDbType.NVarChar,item.PhoneNumber)
+                new("@Name", SqlDbType.NVarChar, item.Name),
+                new("@Address", SqlDbType.NVarChar, item.Address),
+                new("@Email", SqlDbType.NVarChar, item.Email),
+                new("@PhoneNumber", SqlDbType.NVarChar, item.PhoneNumber)
             };
-            await base.ExecuteAsync(query, parameters);
+
+            using SqlConnection connection =
+                SqlConnectionFactory.CreateConnection();
+            using SqlCommand command = new(query, connection);
+
+            foreach (QueryParameter parameter in parameters)
+            {
+                command.Parameters.Add(parameter.Name, parameter.Type)
+                    .Value = parameter.Value ?? DBNull.Value;
+            }
+
+            await connection.OpenAsync();
+
+            int id = Convert.ToInt32(
+                await command.ExecuteScalarAsync());
+
+            item.SetId(id);
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            string query = @"DELETE FROM Suppliers where SupplierID=@Id";
-            List<QueryParameter> parameters = new List<QueryParameter>
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0);
+
+            const string query =
+                "DELETE FROM Suppliers WHERE SupplierID = @Id";
+
+            List<QueryParameter> parameters = new()
             {
-                new QueryParameter("@Id",SqlDbType.Int,id)
+                new("@Id", SqlDbType.Int, id)
             };
-            return await base.ExecuteAsync(query, parameters) > 0;
+
+            return await ExecuteAsync(query, parameters) > 0;
         }
 
-        public async Task<Supplier?> FindByAddress(string address)
-        {
-            string query = @"SELECT SupplierID Name,Address,Email,PhoneNumber FROM Suppliers
-                            where Address=@Address";
-            List<QueryParameter> parameters = new List<QueryParameter>
-            {
-                new QueryParameter("@Address",SqlDbType.NVarChar,address)
-            };
-            return await base.QuerySingleAsync(query, parameters,BuildTable);
-        }
+        public Task<Supplier?> FindByName(string name) =>
+            FindOneAsync("Name", name);
 
-        public async Task<Supplier?> FindByEmail(string email)
-        {
-            string query = @"SELECT SupplierID Name,Address,Email,PhoneNumber FROM Suppliers
-                            where Email=@Email";
-            List<QueryParameter> parameters = new List<QueryParameter>
-            {
-                new QueryParameter("@Email",SqlDbType.NVarChar,email)
-            };
-            return await QuerySingleAsync(query, parameters, BuildTable);
-        }
+        public Task<Supplier?> FindByAddress(string address) =>
+            FindOneAsync("Address", address);
 
+        public Task<Supplier?> FindByEmail(string email) =>
+            FindOneAsync("Email", email);
 
-        public async Task<Supplier?> FindByName(string name)
-        {
-            string query = @"SELECT SupplierID Name,Address,Email,PhoneNumber FROM Suppliers
-                            where Name=@Name";
-            List<QueryParameter> parameters = new List<QueryParameter>
-            {
-                new QueryParameter("@Name",SqlDbType.NVarChar,name)
-            };
-            return await QuerySingleAsync(query, parameters, BuildTable);
-        }
+        public Task<Supplier?> FindByPhoneNumber(string phoneNumber) =>
+            FindOneAsync("PhoneNumber", phoneNumber);
 
-        public async Task<Supplier?> FindByPhoneNumber(string phoneNumber)
+        private Task<Supplier?> FindOneAsync(string column, string value)
         {
-            string query = @"SELECT SupplierID Name,Address,Email,PhoneNumber FROM Suppliers
-                            where PhoneNumber=@PhoneNumber";
-            List<QueryParameter> parameters = new List<QueryParameter>
+            ArgumentNullException.ThrowIfNull(value);
+
+            string query = SelectQuery + $" WHERE {column} = @Value";
+
+            List<QueryParameter> parameters = new()
             {
-                new QueryParameter("@PhoneNumber",SqlDbType.NVarChar,phoneNumber)
+                new("@Value", SqlDbType.NVarChar, value)
             };
-            return await QuerySingleAsync(query, parameters, BuildTable);
+
+            return QuerySingleAsync(query, parameters, BuildTable);
         }
 
         public async Task<IReadOnlyList<Supplier>> GetAllAsync()
         {
-            string query = @"SELECT SupplierID Name,Address,Email,PhoneNumber FROM Suppliers";
-            return await base.QueryAsync(query, new List<QueryParameter>(), BuildTable);
-
+            return await QueryAsync(
+                SelectQuery,
+                new List<QueryParameter>(),
+                BuildTable);
         }
 
         public async Task<Supplier?> GetByIdAsync(int id)
         {
-            string query = @"SELECT SupplierID Name,Address,Email,PhoneNumber FROM Suppliers
-                            where SupplierID=@id ";
-            List<QueryParameter> parameters = new List<QueryParameter>
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0);
+
+            string query = SelectQuery + " WHERE SupplierID = @Id";
+
+            List<QueryParameter> parameters = new()
             {
-                new QueryParameter("@id",SqlDbType.Int,id)
+                new("@Id", SqlDbType.Int, id)
             };
-            return await base.QuerySingleAsync(query, parameters,BuildTable);
+
+            return await QuerySingleAsync(query, parameters, BuildTable);
         }
     }
 }

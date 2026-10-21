@@ -43,10 +43,14 @@ namespace Inventory.General_Interfaces_and_abstract.General_abstract
             JOIN Products p ON sol.ProductID = p.ProductID";
 
         protected abstract T BuildTable(SqlDataReader reader);
-        protected async Task<T> QuerySingleAsync(string query, List<QueryParameter> parameters, Func<SqlDataReader, T> map)
+        protected async Task<T?> QuerySingleAsync(
+            string query,
+            List<QueryParameter> parameters,
+            Func<SqlDataReader, T> map)
         {
-            List<T> result=await QueryAsync(query, parameters, map);
-            return result.FirstOrDefault();
+            List<T> results = await QueryAsync(query, parameters, map);
+
+            return results.FirstOrDefault();
         }
         protected async Task<List<T>> QueryAsync(string query,List<QueryParameter> parameters, Func<SqlDataReader, T> map)
         {
@@ -55,7 +59,9 @@ namespace Inventory.General_Interfaces_and_abstract.General_abstract
             using SqlCommand command=new SqlCommand(query, connection);
             foreach(QueryParameter parameter in parameters)
             {
-                command.Parameters.Add(parameter.Name,parameter.Type).Value = parameter.Value;
+                command.Parameters
+                    .Add(parameter.Name, parameter.Type)
+                    .Value = parameter.Value ?? DBNull.Value;
             }
             await connection.OpenAsync();
             using SqlDataReader reader=await command.ExecuteReaderAsync();
@@ -72,7 +78,9 @@ namespace Inventory.General_Interfaces_and_abstract.General_abstract
             using SqlCommand command=new SqlCommand(query,connection);
             foreach( var parameter in parameters)
             {
-                command.Parameters.Add(parameter.Name, parameter.Type).Value = parameter.Value;
+                command.Parameters
+                    .Add(parameter.Name, parameter.Type)
+                    .Value = parameter.Value ?? DBNull.Value;
             }
             await connection.OpenAsync();
             return await command.ExecuteNonQueryAsync();

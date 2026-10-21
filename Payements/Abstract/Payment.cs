@@ -108,5 +108,12 @@ namespace Inventory.Payements.Abstract
             }
             Id = id;
         }
+        public void SetStatus(PaymentStatus status)
+        {
+            if (!Enum.IsDefined(status))
+                throw new ArgumentOutOfRangeException(nameof(status));
+
+            Status = status;
+        }
     }
 }
