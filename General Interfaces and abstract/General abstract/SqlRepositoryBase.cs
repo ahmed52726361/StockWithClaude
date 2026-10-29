@@ -14,34 +14,6 @@ namespace Inventory.General_Interfaces_and_abstract.General_abstract
 {
     internal abstract class SqlRepositoryBase<T> 
     {
-        protected const string BaseSelect = @"
-            SELECT
-                sol.SalesOrderLineID,
-                sol.OrderQty,
-                sol.OrderPrice,
-
-                si.SalesInvoiceID,
-                si.InvoiceDate,
-                si.TotalAmount,
-                si.PaidStatus,
-
-                c.ClientID,
-                c.Name AS ClientName,
-                c.Address,
-                c.Email,
-                c.PhoneNumber,
-                c.PromotionAccept,
-
-                p.ProductID,
-                p.Name AS ProductName,
-                p.StockQty,
-                p.Price
-
-            FROM SalesOrderLines sol
-            JOIN SalesInvoices si ON sol.SalesInvoiceID = si.SalesInvoiceID
-            JOIN Clients c ON si.ClientID = c.ClientID
-            JOIN Products p ON sol.ProductID = p.ProductID";
-
         protected abstract T BuildTable(SqlDataReader reader);
         protected async Task<T?> QuerySingleAsync(
             string query,
@@ -83,7 +55,29 @@ namespace Inventory.General_Interfaces_and_abstract.General_abstract
                     .Value = parameter.Value ?? DBNull.Value;
             }
             await connection.OpenAsync();
+            // return the number of rows affected by the command
             return await command.ExecuteNonQueryAsync();
         }
+        protected async Task<TResult> ExecuteScalarAsync<TResult>(string query, List<QueryParameter> parameters)
+        {
+            using SqlConnection connection = SqlConnectionFactory.CreateConnection();
+            using SqlCommand command = new SqlCommand(query, connection);
+            foreach (var parameter in parameters)
+            {
+                command.Parameters
+                    .Add(parameter.Name, parameter.Type)
+                    .Value = parameter.Value ?? DBNull.Value;
+            }
+            await connection.OpenAsync();
+            object? result = await command.ExecuteScalarAsync();
+            if (result == null || result == DBNull.Value)
+            {
+                throw new InvalidOperationException("The query did not return a value.");
+            }
+
+            // I asked AI and tell me that it prefered to use Convert.ChangeType to handle the conversion to TResult, but I think it is better to use a direct cast since we expect the result to be of type TResult. If the result is not of type TResult, it will throw an InvalidCastException, which is more appropriate in this context. so what do you think ??
+            return (TResult)result;
+        }
+
     }
 }

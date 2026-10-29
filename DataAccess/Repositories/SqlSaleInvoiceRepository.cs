@@ -48,7 +48,7 @@ internal class SqlSaleInvoiceRepository
         return invoice;
     }
 
-    public async Task AddAsync(SalesInvoice item)
+    public async Task<int> AddAsync(SalesInvoice item)
     {
         ArgumentNullException.ThrowIfNull(item);
 
@@ -59,28 +59,16 @@ internal class SqlSaleInvoiceRepository
             VALUES
                 (@ClientID, @InvoiceDate, @TotalAmount, @PaidStatus);";
 
-        using SqlConnection connection = SqlConnectionFactory.CreateConnection();
-        using SqlCommand command = new(query, connection);
-
-        command.Parameters.Add("@ClientID", SqlDbType.Int).Value =
-            item.Contact.Id;
-
-        command.Parameters.Add("@InvoiceDate", SqlDbType.DateTime2).Value =
-            item.InvoiceDate;
-
-        SqlParameter amount = command.Parameters.Add(
-            "@TotalAmount", SqlDbType.Decimal);
-        amount.Precision = 10;
-        amount.Scale = 2;
-        amount.Value = item.InvoiceAmount;
-
-        command.Parameters.Add("@PaidStatus", SqlDbType.TinyInt).Value =
-            (byte)item.CurrentStatus;
-
-        await connection.OpenAsync();
-
-        int id = (int)(await command.ExecuteScalarAsync())!;
+        List<QueryParameter> parameters = new()
+        {
+            new("@ClientID", SqlDbType.Int, item.Contact.Id),
+            new("@InvoiceDate", SqlDbType.DateTime, item.InvoiceDate),
+            new("@TotalAmount", SqlDbType.Decimal, item.InvoiceAmount),
+            new("@PaidStatus", SqlDbType.TinyInt, (byte)item.CurrentStatus)
+        };
+        int id = await base.ExecuteScalarAsync<int>(query, parameters);
         item.SetId(id);
+        return id;
     }
 
     public async Task<bool> DeleteAsync(int id)

@@ -1,15 +1,45 @@
-﻿
-using Inventory.DataAccess.Repositories;
-using Inventory.Products;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Inventory.DataAccess.Repositories;
+using Inventory.Payements.Abstract;
 
-Console.WriteLine("Program started.");
-SqlProductRepository productRepository = new();
-IReadOnlyList<Product>  AllProducts=await productRepository.GetAllAsync();
-foreach (Product product in AllProducts)
+try
 {
-    Console.WriteLine($"Id:{product.Id} Name :{product.Name} Qty:{product.StockQty} Price:{product.Price}");
+    SqlPaymentRepository paymentRepository = new();
+
+    Payment? payment = await paymentRepository.GetByIdAsync(2);
+
+    if (payment == null)
+    {
+        Console.WriteLine("Payment not found.");
+        return;
+    }
+
+    Console.WriteLine($"Before: {payment.Status}");
+
+    if (payment.PaidDate == null)
+    {
+        bool updated = await paymentRepository.MarkAsPaidAsync(
+            payment.Id,
+            DateTime.Today);
+
+        Console.WriteLine($"Database updated: {updated}");
+    }
+    else
+    {
+        Console.WriteLine("Payment is already paid in the database.");
+    }
+
+    Payment? reloadedPayment =
+        await paymentRepository.GetByIdAsync(payment.Id);
+
+    Console.WriteLine($"Reloaded status: {reloadedPayment?.Status}");
+    Console.WriteLine(
+        $"Reloaded paid date: {reloadedPayment?.PaidDate?.ToShortDateString() ?? "Not paid"}");
 }
-Console.WriteLine("Program finished.");
+catch (Exception ex)
+{
+    Console.WriteLine("TEST FAILED!");
+    Console.WriteLine(ex);
+}
+
+Console.WriteLine("\nPress any key to exit.");
+Console.ReadKey();

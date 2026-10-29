@@ -14,11 +14,11 @@ namespace Inventory.DataAccess.Repositories
         protected override Client BuildTable(SqlDataReader reader)
         {
             Client client = new Client(
-                (bool)reader["PromotionAccept"],
-                (string)reader["Name"]??string.Empty,
-                reader["Address"] as string ?? string.Empty,
-                reader["Email"] as string ?? string.Empty,
-                reader["PhoneNumber"] as string ?? string.Empty);
+            reader["PromotionAccept"] == DBNull.Value ? (bool?)null : (bool)reader["PromotionAccept"],
+            (string)reader["Name"]??string.Empty,
+                reader["Address"] as string,
+                reader["Email"] as string,
+                reader["PhoneNumber"] as string);
 
             client.SetId((int)reader["ClientID"]);
 
@@ -30,18 +30,17 @@ namespace Inventory.DataAccess.Repositories
                    PromotionAccept
             FROM Clients";
 
-        public async Task AddAsync(Client item)
+        public async Task<int> AddAsync(Client item)
         {
             ArgumentNullException.ThrowIfNull(item);
 
             const string query = @"
                 INSERT INTO Clients
                     (Name, Address, Email, PhoneNumber, PromotionAccept)
+                OUTPUT INSERTED.ClientID
                 VALUES
                     (@Name, @Address, @Email, @PhoneNumber,
-                     @PromotionAccept);
-                SELECT CAST(SCOPE_IDENTITY() AS int);";
-
+                 @PromotionAccept);";             
             List<QueryParameter> parameters = new()
             {
                 new("@Name", SqlDbType.NVarChar, item.Name),
@@ -53,22 +52,9 @@ namespace Inventory.DataAccess.Repositories
             };
 
             // ExecuteScalarAsync is needed because this query returns the ID.
-            using SqlConnection connection =
-                SqlConnectionFactory.CreateConnection();
-            using SqlCommand command = new(query, connection);
-
-            foreach (QueryParameter parameter in parameters)
-            {
-                command.Parameters.Add(parameter.Name, parameter.Type)
-                    .Value = parameter.Value ?? DBNull.Value;
-            }
-
-            await connection.OpenAsync();
-
-            int id = Convert.ToInt32(
-                await command.ExecuteScalarAsync());
-
+            int id =await ExecuteScalarAsync<int>(query, parameters);
             item.SetId(id);
+            return id;
         }
 
         public async Task<bool> DeleteAsync(int id)

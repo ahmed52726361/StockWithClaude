@@ -12,7 +12,7 @@ namespace Inventory.Contacts.Abstract
         : ISummarizable, IReceivesDatabaseId
     {
         private string _Name= string.Empty;
-        private string _Email= string.Empty;
+        private string? _Email= string.Empty;
         public string Name
         {
             get { return _Name; }
@@ -28,15 +28,15 @@ namespace Inventory.Contacts.Abstract
                 }
             }
         }
-        public string Address { get; set; }
-        public string Email
+        public string? Address { get; set; }
+        public string? Email
         {
             get { return _Email; }
             set
             {
-                if (string.IsNullOrEmpty(value) || !value.Contains("@"))
+                if(value is not null && (string.IsNullOrEmpty(value) || !value.Contains("@")))
                 {
-                    throw new ArgumentException("Email should not be empty or without @", nameof(Email));
+                    throw new ArgumentException("Email must be a valid email address", nameof(Email));
                 }
                 else
                 {
@@ -44,11 +44,11 @@ namespace Inventory.Contacts.Abstract
                 }
             }
         }
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         public int Id {  get;private set; }
 
-        public AbsContact(string name, string address, string email, string phoneNumber)
+        public AbsContact(string name, string? address, string? email, string? phoneNumber)
         {
               Name = name;
             Address = address;

@@ -1,31 +1,25 @@
 ﻿using Inventory.Orders.Invoices.Interfaces;
 using Inventory.Payements.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Inventory.Payements.Types
 {
-    internal class CryptoPayment : Payment, IRefunded
+    internal sealed class CryptoPayment : Payment
     {
+        public string? TransactionReference { get; private set; }
 
-        public CryptoPayment(IInvoice invoice, decimal amount, DateTime date) : base(invoice, amount, date)
+        public CryptoPayment(
+            IInvoice invoice,
+            decimal amount,
+            DateTime dueDate)
+            : base(invoice, amount, dueDate, PaymentMethod.Crypto)
         {
-
         }
 
-        public override string Pay()
+        public void SetTransactionReference(string reference)
         {
-            return ProcessPayment($"Crypto Payment received: {Amount}");
-        }
-    
-        public string Refund()
-        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(reference);
 
-            return ProcessRefund($"Crypto succed to refend {Amount}");
-
+            TransactionReference = reference;
         }
     }
 }

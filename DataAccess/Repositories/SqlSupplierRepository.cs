@@ -28,7 +28,7 @@ namespace Inventory.DataAccess.Repositories
             return supplier;
         }
 
-        public async Task AddAsync(Supplier item)
+        public async Task<int> AddAsync(Supplier item)
         {
             ArgumentNullException.ThrowIfNull(item);
 
@@ -46,23 +46,10 @@ namespace Inventory.DataAccess.Repositories
                 new("@Email", SqlDbType.NVarChar, item.Email),
                 new("@PhoneNumber", SqlDbType.NVarChar, item.PhoneNumber)
             };
-
-            using SqlConnection connection =
-                SqlConnectionFactory.CreateConnection();
-            using SqlCommand command = new(query, connection);
-
-            foreach (QueryParameter parameter in parameters)
-            {
-                command.Parameters.Add(parameter.Name, parameter.Type)
-                    .Value = parameter.Value ?? DBNull.Value;
-            }
-
-            await connection.OpenAsync();
-
-            int id = Convert.ToInt32(
-                await command.ExecuteScalarAsync());
+            int id = await ExecuteScalarAsync<int>(query, parameters);
 
             item.SetId(id);
+            return id;
         }
 
         public async Task<bool> DeleteAsync(int id)

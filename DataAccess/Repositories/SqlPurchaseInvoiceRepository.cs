@@ -45,7 +45,7 @@ internal class SqlPurchaseInvoiceRepository
         return invoice;
     }
 
-    public async Task AddAsync(PurchaseInvoice item)
+    public async Task<int> AddAsync(PurchaseInvoice item)
     {
         ArgumentNullException.ThrowIfNull(item);
 
@@ -55,43 +55,16 @@ internal class SqlPurchaseInvoiceRepository
             OUTPUT INSERTED.PurchaseInvoiceID
             VALUES
                 (@SupplierID, @InvoiceDate, @TotalAmount, @PaidStatus);";
-        /*
-                     * INSERT INTO PurchaseInvoices
-            (
-                SupplierID,
-                InvoiceDate
-            )
-            VALUES
-            (
-                @SupplierID,
-                @InvoiceDate
-            );
-
-            SELECT SCOPE_IDENTITY();
-        */
-
-        using SqlConnection connection = SqlConnectionFactory.CreateConnection();
-        using SqlCommand command = new(query, connection);
-
-        command.Parameters.Add("@SupplierID", SqlDbType.Int).Value =
-            item.Contact.Id;
-
-        command.Parameters.Add("@InvoiceDate", SqlDbType.DateTime2).Value =
-            item.InvoiceDate;
-
-        SqlParameter amount = command.Parameters.Add(
-            "@TotalAmount", SqlDbType.Decimal);
-        amount.Precision = 10;
-        amount.Scale = 2;
-        amount.Value = item.InvoiceAmount;
-
-        command.Parameters.Add("@PaidStatus", SqlDbType.TinyInt).Value =
-            (byte)item.CurrentStatus;
-
-        await connection.OpenAsync();
-
-        int id = (int)(await command.ExecuteScalarAsync())!;
+        List<QueryParameter> parameters = new()
+        {
+            new("@SupplierID", SqlDbType.Int, item.Contact.Id),
+            new("@InvoiceDate", SqlDbType.DateTime, item.InvoiceDate),
+            new("@TotalAmount", SqlDbType.Decimal, item.InvoiceAmount),
+            new("@PaidStatus", SqlDbType.TinyInt, (byte)item.CurrentStatus)
+        };
+        int id = await ExecuteScalarAsync<int>(query, parameters);
         item.SetId(id);
+        return id;
     }
 
     public async Task<bool> DeleteAsync(int id)

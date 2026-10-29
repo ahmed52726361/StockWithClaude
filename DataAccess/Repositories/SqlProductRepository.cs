@@ -26,17 +26,20 @@ namespace Inventory.DataAccess.Repositories
             product.SetId(Id);
             return product;
         }
-        public async Task AddAsync(Product item)
+        public async Task<int> AddAsync(Product item)
         {
             ArgumentNullException.ThrowIfNull(item, nameof(item));
             
                 string query = @"INSERT INTO Products (Name, StockQty, Price)
-                             VALUES (@Name, @StockQty, @Price)";
+                             VALUES (@Name, @StockQty, @Price)
+                             SELECT CAST(SCOPE_IDENTITY() AS int);";
             List<QueryParameter> paramaters = new List<QueryParameter>();
             paramaters.Add(new QueryParameter("@Name",SqlDbType.NVarChar,item.Name));
             paramaters.Add(new QueryParameter("@StockQty", SqlDbType.Int,item.StockQty));
             paramaters.Add(new QueryParameter("@Price", SqlDbType.Decimal,item.Price));
-            await ExecuteAsync(query, paramaters);
+            int id = await ExecuteScalarAsync<int>(query, paramaters);
+            item.SetId(id);
+            return id;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -48,12 +51,12 @@ namespace Inventory.DataAccess.Repositories
             return await ExecuteAsync(query, paramaters) > 0;
         }
 
-        public async Task<Product> FindByNameAsync(string name)
+        public async Task<Product?> FindByNameAsync(string name)
         {
             ArgumentException.ThrowIfNullOrEmpty(name); 
             string query = "SELECT ProductID, Name, StockQty, Price FROM Products WHERE Name = @name";
             List<QueryParameter> parameters = new List<QueryParameter>();
-            parameters.Add(new QueryParameter("@Name",SqlDbType.NVarChar,name));
+            parameters.Add(new QueryParameter("@name",SqlDbType.NVarChar,name));
             return await QuerySingleAsync(query, parameters,BuildTable);
         }
 
@@ -83,7 +86,7 @@ namespace Inventory.DataAccess.Repositories
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0, nameof(id));
             string query = "SELECT ProductID, Name, StockQty, Price FROM Products WHERE ProductID = @Id";
             List<QueryParameter> parameters = new List<QueryParameter>();
-            parameters.Add(new QueryParameter("@Id", SqlDbType.NVarChar, id));
+            parameters.Add(new QueryParameter("@Id", SqlDbType.Int, id));
             return await QuerySingleAsync(query, parameters, BuildTable);
 
         }

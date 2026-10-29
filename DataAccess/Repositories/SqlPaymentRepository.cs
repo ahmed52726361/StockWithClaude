@@ -4,6 +4,7 @@ using Inventory.General_Interfaces_and_abstract.General_abstract;
 using Inventory.General_Interfaces_and_abstract.Repository_Interfaces;
 using Inventory.Orders.Invoices;
 using Inventory.Orders.Invoices.Interfaces;
+using Inventory.Payements;
 using Inventory.Payements.Abstract;
 using Inventory.Payements.Types;
 using Microsoft.Data.SqlClient;
@@ -18,10 +19,12 @@ internal class SqlPaymentRepository
         SELECT
             pay.PaymentID,
             pay.Amount,
-            pay.PaymentDate,
+            pay.DueDate,
+            pay.PaidDate,   
+            pay.PaymentMethod,
             pay.Last4digits,
-            pay.PaymentStatus,
-            pt.PaymentTypeName,
+            pay.TransferReference,
+            pay.TransactionReference,
             pay.PurchaseInvoiceID,
             pay.SalesInvoiceID,
 
@@ -43,8 +46,6 @@ internal class SqlPaymentRepository
             s.PhoneNumber AS SupplierPhoneNumber
 
         FROM Payments pay
-        INNER JOIN PaymentTypes pt
-            ON pay.PaymentTypeID = pt.PaymentTypeID
         LEFT JOIN SalesInvoices si
             ON pay.SalesInvoiceID = si.SalesInvoiceID
         LEFT JOIN Clients c
@@ -61,12 +62,19 @@ internal class SqlPaymentRepository
         if (reader["SalesInvoiceID"] != DBNull.Value)
         {
             Client client = new(
-                reader["PromotionAccept"] != DBNull.Value &&
-                    (bool)reader["PromotionAccept"],
+                reader["PromotionAccept"] == DBNull.Value
+                    ? null
+                    : (bool)reader["PromotionAccept"],
                 (string)reader["ClientName"],
-                reader["ClientAddress"] == DBNull.Value ? "" : (string)reader["ClientAddress"],
-                reader["ClientEmail"] == DBNull.Value ? "" : (string)reader["ClientEmail"],
-                reader["ClientPhoneNumber"] == DBNull.Value ? "" : (string)reader["ClientPhoneNumber"]);
+                reader["ClientAddress"] == DBNull.Value
+                    ? null
+                    : (string)reader["ClientAddress"],
+                reader["ClientEmail"] == DBNull.Value
+                    ? null
+                    : (string)reader["ClientEmail"],
+                reader["ClientPhoneNumber"] == DBNull.Value
+                    ? null
+                    : (string)reader["ClientPhoneNumber"]);
 
             client.SetId((int)reader["ClientID"]);
 
@@ -84,10 +92,15 @@ internal class SqlPaymentRepository
         {
             Supplier supplier = new(
                 (string)reader["SupplierName"],
-                reader["SupplierAddress"] == DBNull.Value ? "" : (string)reader["SupplierAddress"],
-                reader["SupplierEmail"] == DBNull.Value ? "" : (string)reader["SupplierEmail"],
-                reader["SupplierPhoneNumber"] == DBNull.Value ? "" : (string)reader["SupplierPhoneNumber"]);
-
+                reader["SupplierAddress"] == DBNull.Value
+                    ? string.Empty
+                    : (string)reader["SupplierAddress"],
+                reader["SupplierEmail"] == DBNull.Value
+                    ? string.Empty
+                    : (string)reader["SupplierEmail"],
+                reader["SupplierPhoneNumber"] == DBNull.Value
+                    ? string.Empty
+                    : (string)reader["SupplierPhoneNumber"]);
             supplier.SetId((int)reader["SupplierID"]);
 
             PurchaseInvoice purchaseInvoice = new(
@@ -107,15 +120,15 @@ internal class SqlPaymentRepository
         }
 
         decimal amount = (decimal)reader["Amount"];
-        DateTime date = (DateTime)reader["PaymentDate"];
-        string typeName = (string)reader["PaymentTypeName"];
+        DateTime dueDate = (DateTime)reader["DueDate"];
+        PaymentMethod method = (PaymentMethod)(byte)reader["PaymentMethod"];
 
-        Payment payment = typeName.Trim().ToLowerInvariant() switch
+        Payment payment = method switch
         {
-            "cash" or "cashpayment" =>
-                new CashPayment(invoice, amount, date),
+            PaymentMethod.Cash =>
+                new CashPayment(invoice, amount, dueDate),
 
-            "card" or "cardpayment" =>
+            PaymentMethod.Card =>
                 new CardPayment(
                     reader["Last4digits"] == DBNull.Value
                         ? throw new InvalidOperationException(
@@ -123,25 +136,42 @@ internal class SqlPaymentRepository
                         : (string)reader["Last4digits"],
                     invoice,
                     amount,
-                    date),
+                    dueDate),
 
-            "bank transfer" or "banktransfer" or "banktransferpayment" =>
-                new BankTransferPayment(invoice, amount, date),
+            PaymentMethod.BankTransfer =>
+                new BankTransferPayment(invoice, amount, dueDate),
 
-            "crypto" or "cryptopayment" =>
-                new CryptoPayment(invoice, amount, date),
+            PaymentMethod.Crypto =>
+                new CryptoPayment(invoice, amount, dueDate),
 
             _ => throw new InvalidOperationException(
-                $"Unknown payment type: {typeName}")
+                $"Unknown payment method: {method}")
         };
 
+        if (reader["TransferReference"] != DBNull.Value &&
+            payment is BankTransferPayment bankTransfer)
+        {
+            bankTransfer.SetTransferReference(
+                (string)reader["TransferReference"]);
+        }
+
+        if (reader["TransactionReference"] != DBNull.Value &&
+            payment is CryptoPayment crypto)
+        {
+            crypto.SetTransactionReference(
+                (string)reader["TransactionReference"]);
+        }
+
+        if (reader["PaidDate"] != DBNull.Value)
+        {
+            payment.MarkAsPaid((DateTime)reader["PaidDate"]);
+        }
+
         payment.SetId((int)reader["PaymentID"]);
-        payment.SetStatus((Payment.PaymentStatus)(byte)reader["PaymentStatus"]);
 
         return payment;
     }
-
-    public async Task AddAsync(Payment item)
+    public async Task<int> AddAsync(Payment item)
     {
         ArgumentNullException.ThrowIfNull(item);
 
@@ -163,36 +193,27 @@ internal class SqlPaymentRepository
                 nameof(item));
         }
 
-        string paymentTypeName = item switch
-        {
-            CashPayment => "Cash",
-            CardPayment => "Card",
-            BankTransferPayment => "Bank Transfer",
-            CryptoPayment => "Crypto",
-            _ => throw new ArgumentException(
-                "Unsupported payment type.", nameof(item))
-        };
+        string? last4Digits =
+            item is CardPayment card ? card.Last4Digits : null;
+
+        string? transferReference =
+            item is BankTransferPayment bank ? bank.TransferReference : null;
+
+        string? transactionReference =
+            item is CryptoPayment crypto ? crypto.TransactionReference : null;
 
         const string query = @"
-            DECLARE @TypeID int =
-            (
-                SELECT PaymentTypeID
-                FROM PaymentTypes
-                WHERE PaymentTypeName = @TypeName
-            );
-
-            IF @TypeID IS NULL
-                THROW 50001, 'Payment type not found in PaymentTypes.', 1;
-
             INSERT INTO Payments
             (
                 PurchaseInvoiceID,
                 SalesInvoiceID,
                 Amount,
-                PaymentDate,
+                DueDate,
+                PaidDate,
+                PaymentMethod,
                 Last4digits,
-                PaymentTypeID,
-                PaymentStatus
+                TransferReference,
+                TransactionReference
             )
             OUTPUT INSERTED.PaymentID
             VALUES
@@ -200,45 +221,32 @@ internal class SqlPaymentRepository
                 @PurchaseInvoiceID,
                 @SalesInvoiceID,
                 @Amount,
-                @PaymentDate,
+                @DueDate,
+                @PaidDate,
+                @PaymentMethod,
                 @Last4digits,
-                @TypeID,
-                @PaymentStatus
+                @TransferReference,
+                @TransactionReference
             );";
 
-        using SqlConnection connection = SqlConnectionFactory.CreateConnection();
-        using SqlCommand command = new(query, connection);
+        List<QueryParameter> parameters = new()
+        {
+            new("@PurchaseInvoiceID", SqlDbType.Int, purchaseInvoiceId),
+            new("@SalesInvoiceID", SqlDbType.Int, salesInvoiceId),
+            new("@Amount", SqlDbType.Decimal, item.Amount),
+            new("@DueDate", SqlDbType.DateTime2, item.DueDate),
+            new("@PaidDate", SqlDbType.DateTime2, item.PaidDate),
+            new("@PaymentMethod", SqlDbType.TinyInt, (byte)item.Method),
+            new("@Last4digits", SqlDbType.NVarChar, last4Digits),
+            new("@TransferReference", SqlDbType.NVarChar, transferReference),
+            new("@TransactionReference", SqlDbType.NVarChar, transactionReference)
+        };
 
-        command.Parameters.Add("@PurchaseInvoiceID", SqlDbType.Int).Value =
-            (object?)purchaseInvoiceId ?? DBNull.Value;
+        int id = await ExecuteScalarAsync<int>(query, parameters);
 
-        command.Parameters.Add("@SalesInvoiceID", SqlDbType.Int).Value =
-            (object?)salesInvoiceId ?? DBNull.Value;
-
-        SqlParameter amountParameter =
-            command.Parameters.Add("@Amount", SqlDbType.Decimal);
-        amountParameter.Precision = 10;
-        amountParameter.Scale = 2;
-        amountParameter.Value = item.Amount;
-
-        command.Parameters.Add("@PaymentDate", SqlDbType.DateTime2).Value =
-            item.Date;
-
-        command.Parameters.Add("@Last4digits", SqlDbType.NVarChar, 20).Value =
-            item is CardPayment card
-                ? card.Last4digits
-                : DBNull.Value;
-
-        command.Parameters.Add("@TypeName", SqlDbType.NVarChar, 50).Value =
-            paymentTypeName;
-
-        command.Parameters.Add("@PaymentStatus", SqlDbType.TinyInt).Value =
-            (byte)item.Status;
-
-        await connection.OpenAsync();
-
-        int id = (int)(await command.ExecuteScalarAsync())!;
         item.SetId(id);
+
+        return id;
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -265,13 +273,40 @@ internal class SqlPaymentRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<Payment>> GetByInvoiceIdAsync(int invoiceId)
+    public async Task<IReadOnlyList<Payment>> GetBySalesInvoiceIdAsync(
+        int invoiceId)
     {
         return await QueryAsync(
-            SelectQuery + @"
-                WHERE pay.SalesInvoiceID = @InvoiceID
-                   OR pay.PurchaseInvoiceID = @InvoiceID",
+            SelectQuery + " WHERE pay.SalesInvoiceID = @InvoiceID",
             new() { new("@InvoiceID", SqlDbType.Int, invoiceId) },
             BuildTable);
+    }
+
+    public async Task<IReadOnlyList<Payment>> GetByPurchaseInvoiceIdAsync(
+        int invoiceId)
+    {
+        return await QueryAsync(
+            SelectQuery + " WHERE pay.PurchaseInvoiceID = @InvoiceID",
+            new() { new("@InvoiceID", SqlDbType.Int, invoiceId) },
+            BuildTable);
+    }
+
+    public async Task<bool> MarkAsPaidAsync(int paymentId, DateTime paidDate)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(paymentId, 0);
+
+        const string query = @"
+        UPDATE Payments
+        SET PaidDate = @PaidDate
+        WHERE PaymentID = @PaymentID
+          AND PaidDate IS NULL;";
+
+        List<QueryParameter> parameters = new()
+    {
+        new("@PaidDate", SqlDbType.DateTime2, paidDate),
+        new("@PaymentID", SqlDbType.Int, paymentId)
+    };
+
+        return await ExecuteAsync(query, parameters) > 0;
     }
 }

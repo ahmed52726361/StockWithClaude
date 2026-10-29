@@ -10,7 +10,7 @@ namespace Inventory.General_Interfaces.Repository_Interfaces
 {
     internal interface IRepository<T> where T : class,IHasId
     {
-        Task AddAsync(T item);
+        Task<int> AddAsync(T item);
         Task<T?> GetByIdAsync(int id);
         Task<IReadOnlyList<T>> GetAllAsync();
         Task <bool> DeleteAsync(int id);

@@ -8,7 +8,7 @@ namespace Inventory.Contacts.Interfaces
 {
     internal interface IPromotable
     {
-        bool AcceptsPromotions();
+        bool? AcceptsPromotions();
         string Name {  get; }   
     }
 }

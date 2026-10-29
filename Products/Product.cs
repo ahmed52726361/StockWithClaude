@@ -35,7 +35,6 @@ namespace Inventory.Products
 
             StockQty = quantity;
         }
-        public Product() { }
 
         public void SetId(int id)
         {

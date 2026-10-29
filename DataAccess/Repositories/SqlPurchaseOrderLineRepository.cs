@@ -76,39 +76,101 @@ internal class SqlPurchaseOrderLineRepository
         return line;
     }
 
-    public async Task AddAsync(PurchaseOrderLine item)
+
+    // this method is so hard and i don't know if  I need to learn it as alone 
+    public async Task<int> AddAsync(PurchaseOrderLine item)
     {
         ArgumentNullException.ThrowIfNull(item);
 
-        const string query = @"
-            INSERT INTO PurchaseOrderLines
-                (PurchaseInvoiceID, ProductID, OrderQty, OrderPrice)
-            OUTPUT INSERTED.PurchaseOrderLineID
-            VALUES
-                (@InvoiceID, @ProductID, @Qty, @Price);";
+        const string insertQuery = @"
+        INSERT INTO PurchaseOrderLines
+        (
+            PurchaseInvoiceID,
+            ProductID,
+            OrderQty,
+            OrderPrice
+        )
+        OUTPUT INSERTED.PurchaseOrderLineID
+        VALUES
+        (
+            @InvoiceID,
+            @ProductID,
+            @Qty,
+            @Price
+        );";
 
-        using SqlConnection connection = SqlConnectionFactory.CreateConnection();
-        using SqlCommand command = new(query, connection);
+        const string updateTotalQuery = @"
+        UPDATE PurchaseInvoices
+        SET TotalAmount =
+        (
+            SELECT COALESCE(SUM(OrderQty * OrderPrice), 0)
+            FROM PurchaseOrderLines
+            WHERE PurchaseInvoiceID = @InvoiceID
+        )
+        WHERE PurchaseInvoiceID = @InvoiceID;";
 
-        command.Parameters.Add("@InvoiceID", SqlDbType.Int).Value =
-            item.Invoice.Id;
-
-        command.Parameters.Add("@ProductID", SqlDbType.Int).Value =
-            item.Product.Id;
-
-        command.Parameters.Add("@Qty", SqlDbType.Int).Value =
-            item.Qty;
-
-        SqlParameter price = command.Parameters.Add(
-            "@Price", SqlDbType.Decimal);
-        price.Precision = 10;
-        price.Scale = 2;
-        price.Value = item.OrderPrice;
+        using SqlConnection connection =
+            SqlConnectionFactory.CreateConnection();
 
         await connection.OpenAsync();
 
-        int id = (int)(await command.ExecuteScalarAsync())!;
-        item.SetId(id);
+        using SqlTransaction transaction =
+            (SqlTransaction)await connection.BeginTransactionAsync();
+
+        try
+        {
+            int id;
+
+            using (SqlCommand insertCommand =
+                new(insertQuery, connection, transaction))
+            {
+                insertCommand.Parameters.Add(
+                    "@InvoiceID", SqlDbType.Int).Value = item.Invoice.Id;
+
+                insertCommand.Parameters.Add(
+                    "@ProductID", SqlDbType.Int).Value = item.Product.Id;
+
+                insertCommand.Parameters.Add(
+                    "@Qty", SqlDbType.Int).Value = item.Qty;
+
+                SqlParameter price = insertCommand.Parameters.Add(
+                    "@Price", SqlDbType.Decimal);
+
+                price.Precision = 10;
+                price.Scale = 2;
+                price.Value = item.OrderPrice;
+
+                object? result = await insertCommand.ExecuteScalarAsync();
+
+                if (result is null || result == DBNull.Value)
+                {
+                    throw new InvalidOperationException(
+                        "Failed to retrieve the generated purchase order line ID.");
+                }
+
+                id = Convert.ToInt32(result);
+            }
+
+            using (SqlCommand updateCommand =
+                new(updateTotalQuery, connection, transaction))
+            {
+                updateCommand.Parameters.Add(
+                    "@InvoiceID", SqlDbType.Int).Value = item.Invoice.Id;
+
+                await updateCommand.ExecuteNonQueryAsync();
+            }
+
+            await transaction.CommitAsync();
+
+            item.SetId(id);
+
+            return id;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> DeleteAsync(int id)

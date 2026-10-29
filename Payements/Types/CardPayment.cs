@@ -1,45 +1,36 @@
 ﻿using Inventory.Orders.Invoices.Interfaces;
 using Inventory.Payements.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Inventory.Payements.Types
 {
-    internal class CardPayment:Payment,IRefunded
+    internal sealed class CardPayment : Payment
     {
-        public string Last4digits {  get; private set; }
+        public string Last4Digits { get; }
 
-
-
-        public CardPayment(string last4digits, IInvoice invoice, decimal amount, DateTime date) : base(invoice, amount, date)
+        public CardPayment(
+            string last4Digits,
+            IInvoice invoice,
+            decimal amount,
+            DateTime dueDate)
+            : base(invoice, amount, dueDate, PaymentMethod.Card)
         {
-            if (last4digits.Count()<4)
-            {
-                throw new ArgumentException("you should have 4 digits or more",nameof(last4digits));
+            ArgumentException.ThrowIfNullOrWhiteSpace(last4Digits);
 
-            }
-            else
+            if (last4Digits.Length != 4 ||
+                !last4Digits.All(char.IsDigit))
             {
-                Last4digits = last4digits;
-                
+                throw new ArgumentException(
+                    "Enter exactly four digits.",
+                    nameof(last4Digits));
             }
+
+            Last4Digits = last4Digits;
         }
 
-        public override string Pay()
-        {
-            return ProcessPayment($"Charging card ending {Last4digits}: {Amount}");
-        }
         public override string ReceiptText()
         {
-            return base.ReceiptText() + $" from {Last4digits} Card";
-        }
-
-        public string Refund()
-        {
-            return ProcessRefund($"Card that have {Last4digits} as Last 4 digits refuned {Amount}");
+            return base.ReceiptText() +
+                   $" Card ending in {Last4Digits}";
         }
     }
 }
