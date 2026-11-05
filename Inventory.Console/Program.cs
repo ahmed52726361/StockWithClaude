@@ -1,45 +1,55 @@
-﻿using Inventory.DataAccess.Repositories;
+﻿using Inventory.Application;
+using Inventory.DataAccess.Repositories;
+using Inventory.General_Interfaces.Repository_Interfaces;
 using Inventory.Payements.Abstract;
 
+ProductService productService = new(new SqlProductRepository());
+Console.WriteLine("Start Program");
 try
 {
-    SqlPaymentRepository paymentRepository = new();
+    int id = await productService.AddProductAsync("HandBag", 10m, 7);
 
-    Payment? payment = await paymentRepository.GetByIdAsync(2);
-
-    if (payment == null)
-    {
-        Console.WriteLine("Payment not found.");
-        return;
-    }
-
-    Console.WriteLine($"Before: {payment.Status}");
-
-    if (payment.PaidDate == null)
-    {
-        bool updated = await paymentRepository.MarkAsPaidAsync(
-            payment.Id,
-            DateTime.Today);
-
-        Console.WriteLine($"Database updated: {updated}");
-    }
-    else
-    {
-        Console.WriteLine("Payment is already paid in the database.");
-    }
-
-    Payment? reloadedPayment =
-        await paymentRepository.GetByIdAsync(payment.Id);
-
-    Console.WriteLine($"Reloaded status: {reloadedPayment?.Status}");
-    Console.WriteLine(
-        $"Reloaded paid date: {reloadedPayment?.PaidDate?.ToShortDateString() ?? "Not paid"}");
+    Console.WriteLine($"Handbag added with id {id}");
 }
-catch (Exception ex)
+catch (DuplicateProductNameException ex)
 {
-    Console.WriteLine("TEST FAILED!");
-    Console.WriteLine(ex);
+    Console.WriteLine($"ERROR: {ex.Message}");
 }
 
-Console.WriteLine("\nPress any key to exit.");
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Invalid input: {ex.Message}");
+}
+try
+{
+    int id = 5;
+    int quantityToAdd = 3;
+    bool result = await productService.RestockProductAsync(id, quantityToAdd);
+    Console.WriteLine(result ? $"Quantity changed succefully":$"Nothing changed");
+}catch(ProductNotFoundException ex)
+{
+    Console.WriteLine($"ERROR:{ex.Message}");
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Invalid input: {ex.Message}");
+}
+try
+{
+    int id = 5;
+    decimal newPrice = 19.99m;
+    bool result = await productService.ChangeProductPriceAsync(id, newPrice);
+    Console.WriteLine(result ? $"Price changed succefully":$"Nothing changed");
+}catch(ProductNotFoundException ex)
+{
+    Console.WriteLine($"ERROR:{ex.Message}");
+}
+//why we don't be specific and make a ArgumentOutOfRangeException? and how shoud we know ?
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Invalid input: {ex.Message}");
+}
+
+
+
 Console.ReadKey();

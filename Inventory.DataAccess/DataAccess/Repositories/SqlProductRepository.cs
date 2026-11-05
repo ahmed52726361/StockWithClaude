@@ -1,16 +1,8 @@
-﻿using Inventory.DataAccess.Database;
-using Inventory.General_Interfaces.Repository_Interfaces;
+﻿using Inventory.General_Interfaces.Repository_Interfaces;
 using Inventory.General_Interfaces_and_abstract.General_abstract;
 using Inventory.Products;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Inventory.DataAccess.Repositories
 {
@@ -29,8 +21,12 @@ namespace Inventory.DataAccess.Repositories
         public async Task<int> AddAsync(Product item)
         {
             ArgumentNullException.ThrowIfNull(item, nameof(item));
-            
-                string query = @"INSERT INTO Products (Name, StockQty, Price)
+            Product? SameName=await FindByNameAsync(item.Name);
+            if (SameName!=null)
+            {
+                throw new DuplicateNameException(item.Name);
+            }
+            string query = @"INSERT INTO Products (Name, StockQty, Price)
                              VALUES (@Name, @StockQty, @Price)
                              SELECT CAST(SCOPE_IDENTITY() AS int);";
             List<QueryParameter> paramaters = new List<QueryParameter>();
@@ -90,6 +86,19 @@ namespace Inventory.DataAccess.Repositories
             return await QuerySingleAsync(query, parameters, BuildTable);
 
         }
+        public async Task<bool> UpdateAsync(Product product)
+        {
+            ArgumentNullException.ThrowIfNull(product, nameof(product));
+                string query = "UPDATE Products SET Name=@Name, StockQty=@StockQty, Price=@Price WHERE ProductId=@Id";
+                List<QueryParameter> parameters = new List<QueryParameter>
+                {
+                    new("@Name",SqlDbType.NVarChar,product.Name),
+                    new("@StockQty",SqlDbType.Int,product.StockQty),
+                    new("@Price",SqlDbType.Decimal,product.Price),
+                    new("@Id",SqlDbType.Int,product.Id)
+                };
+                return await ExecuteAsync(query, parameters) > 0;
 
+        }
     }
 }
