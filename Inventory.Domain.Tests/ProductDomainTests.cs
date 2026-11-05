@@ -118,7 +118,7 @@ namespace Inventory.Domain.Tests
         public void AddStock_QuantityCausesOverflow_ThrowsOverflowException()
         {
             Product product = new("Test", 10m, int.MaxValue);
-            Assert.Throws<InvalidOperationException>(()=>product.AddStock(1));
+            Assert.Throws<OverflowException>(()=>product.AddStock(1));
         }
         
         #endregion
@@ -155,7 +155,7 @@ namespace Inventory.Domain.Tests
         public void Sale_QuantityLessThanOrEqualToZero_ThrowsArgumentOutOfRangeException(int qty)
         {
             Product product = new("Test", 10m, 5);
-            Assert.Throws<InvalidOperationException>(()=>product.Sale(qty));
+            Assert.Throws<ArgumentOutOfRangeException>(()=>product.Sale(qty));
         }
 
         #endregion
