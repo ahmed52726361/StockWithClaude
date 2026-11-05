@@ -21,11 +21,6 @@ namespace Inventory.DataAccess.Repositories
         public async Task<int> AddAsync(Product item)
         {
             ArgumentNullException.ThrowIfNull(item, nameof(item));
-            Product? SameName=await FindByNameAsync(item.Name);
-            if (SameName!=null)
-            {
-                throw new DuplicateNameException(item.Name);
-            }
             string query = @"INSERT INTO Products (Name, StockQty, Price)
                              VALUES (@Name, @StockQty, @Price)
                              SELECT CAST(SCOPE_IDENTITY() AS int);";
