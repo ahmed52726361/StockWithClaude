@@ -1,7 +1,5 @@
 ﻿using Inventory.Application;
 using Inventory.DataAccess.Repositories;
-using Inventory.General_Interfaces.Repository_Interfaces;
-using Inventory.Payements.Abstract;
 
 ProductService productService = new(new SqlProductRepository());
 Console.WriteLine("Start Program");

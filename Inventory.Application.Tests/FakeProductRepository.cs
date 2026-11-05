@@ -1,7 +1,5 @@
-﻿using Inventory.General_Interfaces.Repository_Interfaces;
-using Inventory.Products;
-using Microsoft.VisualBasic;
-using System.Linq;
+﻿using Inventory.Domain.Products;
+using Inventory.Domain.Repository_Interfaces;
 
 namespace Inventory.Application.Tests
 {

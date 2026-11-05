@@ -1,7 +1,6 @@
-﻿using Inventory.General_Interfaces.Repository_Interfaces;
-using Inventory.Orders.Lines;
+﻿using Inventory.Domain.Orders.Lines;
 
-namespace Inventory.General_Interfaces_and_abstract.Repository_Interfaces
+namespace Inventory.Domain.Repository_Interfaces
 {
     public interface IPurchaseOrderLineRepository:IRepository<PurchaseOrderLine>
     {

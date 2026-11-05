@@ -1,8 +1,7 @@
 ﻿
-using Inventory.Contacts;
-using Inventory.DataAccess.Database;
-using Inventory.General_Interfaces_and_abstract.General_abstract;
-using Inventory.General_Interfaces_and_abstract.Repository_Interfaces;
+using Inventory.DataAccess.General_abstract;
+using Inventory.Domain.Contacts;
+using Inventory.Domain.Repository_Interfaces;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

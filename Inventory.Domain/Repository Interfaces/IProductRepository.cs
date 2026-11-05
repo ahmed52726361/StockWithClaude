@@ -1,6 +1,6 @@
-﻿using Inventory.Products;
+﻿using Inventory.Domain.Products;
 
-namespace Inventory.General_Interfaces.Repository_Interfaces
+namespace Inventory.Domain.Repository_Interfaces
 {
     public interface IProductRepository : IRepository<Product> 
     {

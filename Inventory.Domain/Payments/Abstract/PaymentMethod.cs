@@ -1,4 +1,4 @@
-﻿namespace Inventory.Payements
+﻿namespace Inventory.Domain.Payments.Abstract
 {
     public enum PaymentMethod
     {

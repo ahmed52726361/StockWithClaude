@@ -1,9 +1,9 @@
-﻿using Inventory.Contacts;
-using Inventory.Orders.Invoices;
-using Inventory.Orders.Lines.Abstract;
-using Inventory.Products;
+﻿using Inventory.Domain.Contacts;
+using Inventory.Domain.Orders.Invoices;
+using Inventory.Domain.Orders.Lines.Abstract;
+using Inventory.Domain.Products;
 
-namespace Inventory.Orders.Lines
+namespace Inventory.Domain.Orders.Lines
 {
 
     public class PurchaseOrderLine:AbsOrderLine<Supplier>

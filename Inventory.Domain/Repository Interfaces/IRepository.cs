@@ -1,6 +1,6 @@
-﻿using Inventory.Services;
+﻿using Inventory.Domain;
 
-namespace Inventory.General_Interfaces.Repository_Interfaces
+namespace Inventory.Domain.Repository_Interfaces
 {
     public interface IRepository<T> where T : class,IHasId
     {

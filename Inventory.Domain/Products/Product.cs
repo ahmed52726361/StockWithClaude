@@ -1,8 +1,4 @@
-﻿    using Inventory.General_Interfaces;
-
-
-
-    namespace Inventory.Products
+﻿namespace Inventory.Domain.Products
     {
         public class Product : ISummarizable, IReceivesDatabaseId
         {

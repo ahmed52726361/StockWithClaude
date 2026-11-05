@@ -1,4 +1,4 @@
-﻿namespace Inventory.Services
+﻿namespace Inventory.Domain
 {
     public interface IHasId
     {

@@ -1,4 +1,4 @@
-﻿namespace Inventory
+﻿namespace Inventory.Domain
 {
     public interface ISummarizable
     {

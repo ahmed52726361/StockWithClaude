@@ -1,7 +1,7 @@
-﻿using Inventory.General_Interfaces.Repository_Interfaces;
-using Inventory.Payements.Abstract;
+﻿using Inventory.Domain.Repository_Interfaces;
+using Inventory.Domain.Payments.Abstract;
 
-namespace Inventory.General_Interfaces_and_abstract.Repository_Interfaces
+namespace Inventory.Domain.Repository_Interfaces
 {
     public interface IPaymentRepository : IRepository<Payment>
     {

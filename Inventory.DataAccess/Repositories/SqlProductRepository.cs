@@ -1,6 +1,6 @@
-﻿using Inventory.General_Interfaces.Repository_Interfaces;
-using Inventory.General_Interfaces_and_abstract.General_abstract;
-using Inventory.Products;
+﻿using Inventory.DataAccess.General_abstract;
+using Inventory.Domain.Products;
+using Inventory.Domain.Repository_Interfaces;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

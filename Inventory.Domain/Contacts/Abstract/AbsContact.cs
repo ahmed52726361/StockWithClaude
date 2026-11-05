@@ -1,6 +1,6 @@
-﻿using Inventory.General_Interfaces;
+﻿using Inventory.Domain;
 
-namespace Inventory.Contacts.Abstract
+namespace Inventory.Domain.Contacts.Abstract
 {
     public abstract class AbsContact
         : ISummarizable, IReceivesDatabaseId

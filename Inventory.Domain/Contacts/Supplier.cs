@@ -1,6 +1,6 @@
-﻿using Inventory.Contacts.Abstract;
+﻿using Inventory.Domain.Contacts.Abstract;
 
-namespace Inventory.Contacts
+namespace Inventory.Domain.Contacts
 {
     public class Supplier : AbsContact
     {

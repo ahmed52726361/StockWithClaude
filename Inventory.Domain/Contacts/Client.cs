@@ -1,7 +1,7 @@
-﻿using Inventory.Contacts.Abstract;
-using Inventory.Contacts.Interfaces;
+﻿using Inventory.Domain.Contacts.Abstract;
+using Inventory.Domain.Contacts.Interfaces;
 
-namespace Inventory.Contacts
+namespace Inventory.Domain.Contacts
 {
     public class Client : AbsContact, IPromotable
     {

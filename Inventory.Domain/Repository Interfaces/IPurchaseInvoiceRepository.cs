@@ -1,7 +1,6 @@
-﻿using Inventory.General_Interfaces.Repository_Interfaces;
-using Inventory.Orders.Invoices;
+﻿using Inventory.Domain.Orders.Invoices;
 
-namespace Inventory.General_Interfaces_and_abstract.Repository_Interfaces
+namespace Inventory.Domain.Repository_Interfaces
 {
     public interface IPurchaseInvoiceRepository:IRepository<PurchaseInvoice>
     {

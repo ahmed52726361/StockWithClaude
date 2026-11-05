@@ -1,7 +1,7 @@
-﻿using Inventory.Orders.Invoices.Interfaces;
-using Inventory.Payements.Abstract;
+﻿using Inventory.Domain.Orders.Invoices.Interfaces;
+using Inventory.Domain.Payments.Abstract;
 
-namespace Inventory.Payements.Types
+namespace Inventory.Domain.Payments.Types
 {
     public sealed class BankTransferPayment : Payment
     {

@@ -1,4 +1,4 @@
-﻿namespace Inventory.Contacts.Interfaces
+﻿namespace Inventory.Domain.Contacts.Interfaces
 {
     public interface IPromotable
     {

@@ -1,7 +1,7 @@
-﻿using Inventory.General_Interfaces;
-using Inventory.Orders.Invoices.Interfaces;
+﻿using Inventory.Domain;
+using Inventory.Domain.Orders.Invoices.Interfaces;
 
-namespace Inventory.Payements.Abstract
+namespace Inventory.Domain.Payments.Abstract
 {
     public abstract class Payment : IReceivesDatabaseId
     {

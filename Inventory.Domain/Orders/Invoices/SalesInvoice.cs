@@ -1,7 +1,7 @@
-﻿using Inventory.Contacts;
-using Inventory.Orders.Invoices.Abstract;
+﻿using Inventory.Domain.Contacts;
+using Inventory.Domain.Orders.Invoices.Abstract;
 
-namespace Inventory.Orders.Invoices
+namespace Inventory.Domain.Orders.Invoices
 {
     public class SalesInvoice:AbsInvoice<Client>
     {

@@ -1,5 +1,5 @@
-﻿using Inventory.General_Interfaces.Repository_Interfaces;
-using Inventory.Products;
+﻿using Inventory.Domain.Repository_Interfaces;
+using Inventory.Domain.Products;
 
 namespace Inventory.Application
 {

@@ -1,9 +1,8 @@
-﻿using Inventory.Contacts.Abstract;
-using Inventory.General_Interfaces;
-using Inventory.Orders.Invoices.Abstract;
-using Inventory.Products;
+﻿using Inventory.Domain.Contacts.Abstract;
+using Inventory.Domain.Orders.Invoices.Abstract;
+using Inventory.Domain.Products;
 
-namespace Inventory.Orders.Lines.Abstract
+namespace Inventory.Domain.Orders.Lines.Abstract
 {
     public abstract class AbsOrderLine<TContact>
         : IReceivesDatabaseId

@@ -1,4 +1,4 @@
-﻿namespace Inventory.Orders.Invoices.Interfaces
+﻿namespace Inventory.Domain.Orders.Invoices.Interfaces
 {
     public interface IInvoice
     {

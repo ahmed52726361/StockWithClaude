@@ -1,16 +1,7 @@
 ﻿using Inventory.DataAccess.Database;
-using Inventory.Products;
-using Inventory.Services;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
-namespace Inventory.General_Interfaces_and_abstract.General_abstract
+namespace Inventory.DataAccess.General_abstract
 {
     public abstract class SqlRepositoryBase<T> 
     {

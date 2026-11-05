@@ -1,6 +1,4 @@
-﻿using Inventory.Services;
-
-namespace Inventory.General_Interfaces
+﻿namespace Inventory.Domain
 {
     public interface IReceivesDatabaseId : IHasId
     {
