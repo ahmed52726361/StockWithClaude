@@ -90,19 +90,19 @@ public class SqlPurchaseInvoiceRepository
             BuildTable);
     }
 
-    public Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierName(string name)
-        => FindBySupplierColumn("s.Name", name);
+    public async Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierNameAsync(string name)
+        => await FindBySupplierColumnAsync("s.Name", name);
 
-    public Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierAddress(string address)
-        => FindBySupplierColumn("s.Address", address);
+    public async Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierAddressAsync(string address)
+        => await FindBySupplierColumnAsync("s.Address", address);
 
-    public Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierEmail(string email)
-        => FindBySupplierColumn("s.Email", email);
+    public async Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierEmailAsync(string email)
+        => await FindBySupplierColumnAsync("s.Email", email);
 
-    public Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierPhoneNumber(string phoneNumber)
-        => FindBySupplierColumn("s.PhoneNumber", phoneNumber);
+    public async Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierPhoneNumberAsync(string phoneNumber)
+        => await FindBySupplierColumnAsync("s.PhoneNumber", phoneNumber);
 
-    private async Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierColumn(
+    private async Task<IReadOnlyList<PurchaseInvoice>> FindBySupplierColumnAsync(
         string column, string value)
     {
         string query = $"{SelectQuery} WHERE {column} = @Value";
@@ -113,7 +113,7 @@ public class SqlPurchaseInvoiceRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseInvoice>> GetAllInvoicesBySupplierID(
+    public async Task<IReadOnlyList<PurchaseInvoice>> GetAllInvoicesBySupplierIDAsync(
         int supplierID)
     {
         return await QueryAsync(
@@ -122,7 +122,7 @@ public class SqlPurchaseInvoiceRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseInvoice>> GetAllInvoicesByDate(
+    public async Task<IReadOnlyList<PurchaseInvoice>> GetAllInvoicesByDateAsync(
         DateTime dateTime)
     {
         return await QueryAsync(

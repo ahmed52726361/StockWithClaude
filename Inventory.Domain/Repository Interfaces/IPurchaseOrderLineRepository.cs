@@ -4,12 +4,12 @@ namespace Inventory.Domain.Repository_Interfaces
 {
     public interface IPurchaseOrderLineRepository:IRepository<PurchaseOrderLine>
     {
-        Task<IReadOnlyList<PurchaseOrderLine>> FindByInvoiceID(int invoiceID);
-        Task<IReadOnlyList<PurchaseOrderLine>> FindByProductID(int productID);
-        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyLessThan(int qty);
-        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyGreaterThan(int qty);
-        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceLessThan(decimal price);
-        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceGreaterThan(decimal price);
+        Task<IReadOnlyList<PurchaseOrderLine>> FindByInvoiceIDAsync(int invoiceID);
+        Task<IReadOnlyList<PurchaseOrderLine>> FindByProductIDAsync(int productID);
+        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyLessThanAsync(int qty);
+        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyGreaterThanAsync(int qty);
+        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceLessThanAsync(decimal price);
+        Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceGreaterThanAsync(decimal price);
 
     }
 }

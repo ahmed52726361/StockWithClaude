@@ -155,7 +155,7 @@ public class SqlSalesOrderLineRepository
         return await ExecuteAsync(query, parameters) > 0;
     }
 
-    public async Task<IReadOnlyList<SalesOrderLine>> FindByInvoiceID(int invoiceID)
+    public async Task<IReadOnlyList<SalesOrderLine>> FindByInvoiceIDAsync(int invoiceID)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(invoiceID, 0);
 
@@ -170,7 +170,7 @@ public class SqlSalesOrderLineRepository
         return await QueryAsync(query, parameters, BuildTable);
     }
 
-    public async Task<IReadOnlyList<SalesOrderLine>> FindByProductID(int productID)
+    public async Task<IReadOnlyList<SalesOrderLine>> FindByProductIDAsync(int productID)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(productID, 0);
 
@@ -208,7 +208,7 @@ public class SqlSalesOrderLineRepository
         return await QuerySingleAsync(query, parameters, BuildTable);
     }
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceGreaterThan(decimal price)
+    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceGreaterThanAsync(decimal price)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(price, 0);
 
@@ -223,7 +223,7 @@ public class SqlSalesOrderLineRepository
         return await QueryAsync(query, parameters, BuildTable);
     }
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceLessThan(decimal price)
+    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceLessThanAsync(decimal price)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(price, 0);
 
@@ -238,7 +238,7 @@ public class SqlSalesOrderLineRepository
         return await QueryAsync(query, parameters, BuildTable);
     }
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyGreaterThan(int qty)
+    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyGreaterThanAsync(int qty)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(qty, 0);
 
@@ -253,7 +253,7 @@ public class SqlSalesOrderLineRepository
         return await QueryAsync(query, parameters, BuildTable);
     }
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyLessThan(int qty)
+    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyLessThanAsync(int qty)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(qty, 0);
 

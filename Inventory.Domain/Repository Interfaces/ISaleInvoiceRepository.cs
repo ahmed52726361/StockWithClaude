@@ -4,12 +4,12 @@ namespace Inventory.Domain.Repository_Interfaces
 {
     public interface ISaleInvoiceRepository:IRepository<SalesInvoice>
     {
-        Task<IReadOnlyList<SalesInvoice>> FindByClientName(string name);
-        Task<IReadOnlyList<SalesInvoice>> FindByClientAddress(string address);
-        Task<IReadOnlyList<SalesInvoice>> FindByClientEmail(string email);
-        Task<IReadOnlyList<SalesInvoice>> FindByClientPhoneNumber(string phoneNumber);
-        Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByClientID(int clientId);
-        Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByDate(DateTime dateTime);
+        Task<IReadOnlyList<SalesInvoice>> FindByClientNameAsync(string name);
+        Task<IReadOnlyList<SalesInvoice>> FindByClientAddressAsync(string address);
+        Task<IReadOnlyList<SalesInvoice>> FindByClientEmailAsync(string email);
+        Task<IReadOnlyList<SalesInvoice>> FindByClientPhoneNumberAsync(string phoneNumber);
+        Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByClientIDAsync(int clientId);
+        Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByDateAsync(DateTime dateTime);
 
     }
 }

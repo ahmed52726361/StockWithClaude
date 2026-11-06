@@ -197,7 +197,7 @@ public class SqlPurchaseOrderLineRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseOrderLine>> FindByInvoiceID(
+    public async Task<IReadOnlyList<PurchaseOrderLine>> FindByInvoiceIDAsync(
         int invoiceID)
     {
         return await QueryAsync(
@@ -206,7 +206,7 @@ public class SqlPurchaseOrderLineRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseOrderLine>> FindByProductID(
+    public async Task<IReadOnlyList<PurchaseOrderLine>> FindByProductIDAsync(
         int productID)
     {
         return await QueryAsync(
@@ -215,7 +215,7 @@ public class SqlPurchaseOrderLineRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyLessThan(
+    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyLessThanAsync(
         int qty)
     {
         return await QueryAsync(
@@ -224,7 +224,7 @@ public class SqlPurchaseOrderLineRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyGreaterThan(
+    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersQtyGreaterThanAsync(
         int qty)
     {
         return await QueryAsync(
@@ -233,7 +233,7 @@ public class SqlPurchaseOrderLineRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceLessThan(
+    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceLessThanAsync(
         decimal price)
     {
         return await QueryAsync(
@@ -242,7 +242,7 @@ public class SqlPurchaseOrderLineRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceGreaterThan(
+    public async Task<IReadOnlyList<PurchaseOrderLine>> GetAllOrdersPriceGreaterThanAsync(
         decimal price)
     {
         return await QueryAsync(

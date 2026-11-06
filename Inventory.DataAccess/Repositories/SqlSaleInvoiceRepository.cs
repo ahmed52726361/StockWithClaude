@@ -94,25 +94,25 @@ public class SqlSaleInvoiceRepository
             BuildTable);
     }
 
-    public Task<IReadOnlyList<SalesInvoice>> FindByClientName(string name)
-        => FindByClientColumn("c.Name", name);
+    public async Task<IReadOnlyList<SalesInvoice>> FindByClientNameAsync(string name)
+        => await FindByClientColumnAsync("c.Name", name);
 
-    public Task<IReadOnlyList<SalesInvoice>> FindByClientAddress(string address)
-        => FindByClientColumn("c.Address", address);
+    public async Task<IReadOnlyList<SalesInvoice>> FindByClientAddressAsync(string address)
+        => await FindByClientColumnAsync("c.Address", address);
 
-    public Task<IReadOnlyList<SalesInvoice>> FindByClientEmail(string email)
-        => FindByClientColumn("c.Email", email);
+    public async Task<IReadOnlyList<SalesInvoice>> FindByClientEmailAsync(string email)
+        => await FindByClientColumnAsync("c.Email", email);
 
-    public Task<IReadOnlyList<SalesInvoice>> FindByClientPhoneNumber(string phoneNumber)
-        => FindByClientColumn("c.PhoneNumber", phoneNumber);
+    public async Task<IReadOnlyList<SalesInvoice>> FindByClientPhoneNumberAsync(string phoneNumber)
+        => await FindByClientColumnAsync("c.PhoneNumber", phoneNumber);
 
-    private Task<IReadOnlyList<SalesInvoice>> FindByClientColumn(
+    private async Task<IReadOnlyList<SalesInvoice>> FindByClientColumnAsync(
         string column, string value)
     {
         // Column names are fixed by the methods above, never supplied by user input.
         string query = $"{SelectQuery} WHERE {column} = @Value";
 
-        return QueryAsync(
+        return await QueryAsync(
             query,
             new() { new("@Value", SqlDbType.NVarChar, value) },
             BuildTable)
@@ -120,7 +120,7 @@ public class SqlSaleInvoiceRepository
                 task => task.GetAwaiter().GetResult());
     }
 
-    public async Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByClientID(
+    public async Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByClientIDAsync(
         int clientId)
     {
         return await QueryAsync(
@@ -129,7 +129,7 @@ public class SqlSaleInvoiceRepository
             BuildTable);
     }
 
-    public async Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByDate(
+    public async Task<IReadOnlyList<SalesInvoice>> GetAllInvoicesByDateAsync(
         DateTime dateTime)
     {
         return await QueryAsync(

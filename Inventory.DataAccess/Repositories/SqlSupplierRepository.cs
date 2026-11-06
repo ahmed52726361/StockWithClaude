@@ -66,19 +66,19 @@ namespace Inventory.DataAccess.Repositories
             return await ExecuteAsync(query, parameters) > 0;
         }
 
-        public Task<Supplier?> FindByName(string name) =>
-            FindOneAsync("Name", name);
+        public async Task<Supplier?> FindByNameAsync(string name) =>
+            await FindOneAsync("Name", name);
 
-        public Task<Supplier?> FindByAddress(string address) =>
-            FindOneAsync("Address", address);
+        public async Task<Supplier?> FindByAddressAsync(string address) =>
+            await FindOneAsync("Address", address);
 
-        public Task<Supplier?> FindByEmail(string email) =>
-            FindOneAsync("Email", email);
+        public async Task<Supplier?> FindByEmailAsync(string email) =>
+            await FindOneAsync("Email", email);
 
-        public Task<Supplier?> FindByPhoneNumber(string phoneNumber) =>
-            FindOneAsync("PhoneNumber", phoneNumber);
+        public async Task<Supplier?> FindByPhoneNumberAsync(string phoneNumber) =>
+            await FindOneAsync("PhoneNumber", phoneNumber);
 
-        private Task<Supplier?> FindOneAsync(string column, string value)
+        private async Task<Supplier?> FindOneAsync(string column, string value)
         {
             ArgumentNullException.ThrowIfNull(value);
 
@@ -89,7 +89,7 @@ namespace Inventory.DataAccess.Repositories
                 new("@Value", SqlDbType.NVarChar, value)
             };
 
-            return QuerySingleAsync(query, parameters, BuildTable);
+            return await QuerySingleAsync(query, parameters, BuildTable);
         }
 
         public async Task<IReadOnlyList<Supplier>> GetAllAsync()

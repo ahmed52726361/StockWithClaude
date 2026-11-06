@@ -19,7 +19,7 @@ namespace Inventory.DataAccess.General_abstract
         {
             var result= new List<T>();
             using SqlConnection connection=SqlConnectionFactory.CreateConnection();
-            using SqlCommand command=new SqlCommand(query, connection);
+            using SqlCommand command=new (query, connection);
             foreach(QueryParameter parameter in parameters)
             {
                 command.Parameters
@@ -38,7 +38,7 @@ namespace Inventory.DataAccess.General_abstract
         protected async Task<int> ExecuteAsync(string query, List<QueryParameter> parameters)
         {
             using SqlConnection connection = SqlConnectionFactory.CreateConnection();
-            using SqlCommand command=new SqlCommand(query,connection);
+            using SqlCommand command=new (query,connection);
             foreach( var parameter in parameters)
             {
                 command.Parameters
@@ -52,7 +52,7 @@ namespace Inventory.DataAccess.General_abstract
         protected async Task<TResult> ExecuteScalarAsync<TResult>(string query, List<QueryParameter> parameters)
         {
             using SqlConnection connection = SqlConnectionFactory.CreateConnection();
-            using SqlCommand command = new SqlCommand(query, connection);
+            using SqlCommand command = new (query, connection);
             foreach (var parameter in parameters)
             {
                 command.Parameters

@@ -12,7 +12,7 @@ namespace Inventory.DataAccess.Repositories
     {
         protected override Client BuildTable(SqlDataReader reader)
         {
-            Client client = new Client(
+            Client client = new (
             reader["PromotionAccept"] == DBNull.Value ? (bool?)null : (bool)reader["PromotionAccept"],
             (string)reader["Name"]??string.Empty,
                 reader["Address"] as string,
@@ -93,21 +93,21 @@ namespace Inventory.DataAccess.Repositories
                 BuildTable);
         }
 
-        public Task<Client?> FindByName(string name)
+        public async Task<Client?> FindByNameAsync(string name)
         {
-            return FindOneAsync("Name", name);
+            return await FindOneAsync("Name", name);
         }
 
-        public Task<Client?> FindByAddress(string address) =>
-            FindOneAsync("Address", address);
+        public async Task<Client?> FindByAddressAsync(string address) =>
+            await FindOneAsync("Address", address);
 
-        public Task<Client?> FindByEmail(string email) =>
-            FindOneAsync("Email", email);
+        public async Task<Client?> FindByEmailAsync(string email) =>
+            await FindOneAsync("Email", email);
 
-        public Task<Client?> FindByPhoneNumber(string phoneNumber) =>
-            FindOneAsync("PhoneNumber", phoneNumber);
+        public async Task<Client?> FindByPhoneNumberAsync(string phoneNumber) =>
+            await FindOneAsync("PhoneNumber", phoneNumber);
 
-        private Task<Client?> FindOneAsync(string column, string value)
+        private async Task<Client?> FindOneAsync(string column, string value)
         {
             ArgumentNullException.ThrowIfNull(value);
 
@@ -119,10 +119,10 @@ namespace Inventory.DataAccess.Repositories
                 new("@Value", SqlDbType.NVarChar, value)
             };
 
-            return QuerySingleAsync(query, parameters, BuildTable);
+            return await QuerySingleAsync(query, parameters, BuildTable);
         }
 
-        public async Task<IReadOnlyList<Client>> GetByPromotionAccept(
+        public async Task<IReadOnlyList<Client>> GetByPromotionAcceptAsync(
             bool promotionAccept)
         {
             string query = SelectQuery +
