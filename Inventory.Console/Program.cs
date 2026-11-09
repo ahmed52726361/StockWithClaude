@@ -1,53 +1,38 @@
-﻿using Inventory.Application;
+﻿using Inventory.DataAccess.Database;
 using Inventory.DataAccess.Repositories;
+using Microsoft.Data.SqlClient;
+using Inventory.Domain.Repository_Interfaces;
+using System;
+using System.Threading.Tasks;
 
-ProductService productService = new(new SqlProductRepository());
-Console.WriteLine("Start Program");
-try
+class Program
 {
-    int id = await productService.AddProductAsync("HandBag", 10m, 7);
+    public static async Task TestTransactionAsync()
+    {
+        IProductRepository productRepository=new SqlProductRepository();
+        using SqlConnection connection = SqlConnectionFactory.CreateConnection();
+        await connection.OpenAsync(); // how we used async and the connection is not a task ?
+        string query = "UPDATE Products SET StockQty=7 WHERE Name=@NewName";
+        string newName = "HandBag";
+        await using SqlTransaction transaction=(SqlTransaction)await connection.BeginTransactionAsync();
+        using SqlCommand command = new SqlCommand(query, connection, transaction);
+        command.Parameters.AddWithValue("@NewName",newName);
 
-    Console.WriteLine($"Handbag added with id {id}");
-}
-catch (DuplicateProductNameException ex)
-{
-    Console.WriteLine($"ERROR: {ex.Message}");
-}
+        try
+        {
+            await command.ExecuteNonQueryAsync();
+            //await transaction.RollbackAsync();
+            await transaction.CommitAsync();
 
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Invalid input: {ex.Message}");
-}
-try
-{
-    int id = 5;
-    int quantityToAdd = 3;
-    bool result = await productService.RestockProductAsync(id, quantityToAdd);
-    Console.WriteLine(result ? $"Quantity changed succefully":$"Nothing changed");
-}catch(ProductNotFoundException ex)
-{
-    Console.WriteLine($"ERROR:{ex.Message}");
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Invalid input: {ex.Message}");
-}
-try
-{
-    int id = 5;
-    decimal newPrice = 19.99m;
-    bool result = await productService.ChangeProductPriceAsync(id, newPrice);
-    Console.WriteLine(result ? $"Price changed succefully":$"Nothing changed");
-}catch(ProductNotFoundException ex)
-{
-    Console.WriteLine($"ERROR:{ex.Message}");
-}
-//why we don't be specific and make a ArgumentOutOfRangeException? and how shoud we know ?
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Invalid input: {ex.Message}");
-}
+        }catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
 
-
-
-Console.ReadKey();
+    }
+    static async Task Main(string[] args)
+    {
+        await TestTransactionAsync();
+    }
+}
