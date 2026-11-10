@@ -7,8 +7,8 @@ namespace Inventory.DataAccess.UnitOfWork
     public class SqlUnitOfWork : IUnitOfWork
     {
         internal SqlConnection _connection = SqlConnectionFactory.CreateConnection();
-        internal SqlTransaction _transaction;
-        internal bool HasActiveTransaction {  get; set; }
+        internal SqlTransaction? _transaction;
+        internal bool HasActiveTransaction {  get;private set; }
         public async Task BeginTransactionAsync()
         {
             if (_transaction != null)

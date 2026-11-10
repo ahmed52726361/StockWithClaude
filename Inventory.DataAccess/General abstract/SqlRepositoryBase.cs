@@ -1,82 +1,112 @@
 ﻿using Inventory.DataAccess.Database;
 using Inventory.DataAccess.UnitOfWork;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
-using System.Net.Sockets;
 
 namespace Inventory.DataAccess.General_abstract
 {
-    public abstract class SqlRepositoryBase<T> 
+    public abstract class SqlRepositoryBase<T>
     {
-        private SqlUnitOfWork _unitOfWork;
-        protected  SqlRepositoryBase(SqlUnitOfWork? unitOfWork=null)
+        private readonly SqlUnitOfWork? _unitOfWork;
+
+        protected SqlRepositoryBase(SqlUnitOfWork? unitOfWork = null)
         {
             _unitOfWork = unitOfWork;
         }
-        //protected  SqlRepositoryBase()
-        //{
-        //    // I tought that wa can add another one like this if there is no transaction
-        //}
 
         protected abstract T BuildTable(SqlDataReader reader);
-        private SqlCommand CreateCommand( string query, List<QueryParameter> parameters)
+
+        // The ONE place that decides which connection to use, opens it,
+        // runs the work, and cleans up.
+        private async Task<TResult> RunAsync<TResult>(
+            string query,
+            List<QueryParameter> parameters,
+            Func<SqlCommand, Task<TResult>> action)
         {
             SqlConnection connection;
-            SqlCommand command;
-            if (_unitOfWork!=null&&_unitOfWork.HasActiveTransaction)
+            SqlTransaction? transaction;
+            bool ownsConnection;
+
+            SqlUnitOfWork? unitOfWork = _unitOfWork;
+            if (unitOfWork != null && unitOfWork.HasActiveTransaction)
             {
-                connection=_unitOfWork._connection;
-                command = new(query, connection, _unitOfWork._transaction);
+                // Shared: already open, owned by the unit of work. Never open or dispose it.
+                connection = unitOfWork._connection;
+                transaction = unitOfWork._transaction;
+                ownsConnection = false;
             }
             else
             {
-                connection=SqlConnectionFactory.CreateConnection();
-                command = new(query, connection);
+                // Private: we open it and we dispose it.
+                connection = SqlConnectionFactory.CreateConnection();
+                transaction = null;
+                ownsConnection = true;
             }
-            foreach (var parameter in parameters)
-            {
-                command.Parameters
-                    .Add(parameter.Name, parameter.Type)
-                    .Value = parameter.Value ?? DBNull.Value;
-            }
-            return command;
 
+            try
+            {
+                if (ownsConnection)
+                    await connection.OpenAsync();
+
+                await using SqlCommand command = new(query, connection, transaction);
+                foreach (QueryParameter parameter in parameters)
+                {
+                    command.Parameters
+                        .Add(parameter.Name, parameter.Type)
+                        .Value = parameter.Value ?? DBNull.Value;
+                }
+
+                return await action(command);
+            }   // the command is disposed here
+            finally
+            {
+                if (ownsConnection)
+                    await connection.DisposeAsync();
+            }
         }
+
         protected async Task<T?> QuerySingleAsync(
             string query,
             List<QueryParameter> parameters,
             Func<SqlDataReader, T> map)
         {
             List<T> results = await QueryAsync(query, parameters, map);
-
             return results.FirstOrDefault();
         }
-        protected async Task<List<T>> QueryAsync(string query,List<QueryParameter> parameters, Func<SqlDataReader, T> map)
-        {
-            var result= new List<T>();
-            using SqlDataReader reader = await CreateCommand(query, parameters).ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                result.Add(map(reader));
-            }
-            return result;
 
-        }
-        protected async Task<int> ExecuteAsync(string query, List<QueryParameter> parameters)
+        protected Task<List<T>> QueryAsync(
+            string query,
+            List<QueryParameter> parameters,
+            Func<SqlDataReader, T> map)
         {
-            return await CreateCommand(query, parameters).ExecuteNonQueryAsync();
+            return RunAsync(query, parameters, async command =>
+            {
+                var result = new List<T>();
+                await using SqlDataReader reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    result.Add(map(reader));
+                }
+                return result;   // the reader is disposed when this lambda ends
+            });
         }
-        protected async Task<TResult> ExecuteScalarAsync<TResult>(string query, List<QueryParameter> parameters)
+
+        protected Task<int> ExecuteAsync(string query, List<QueryParameter> parameters)
         {
-            object? result = await CreateCommand(query,parameters).ExecuteScalarAsync();
+            // returns the number of rows affected
+            return RunAsync(query, parameters, command => command.ExecuteNonQueryAsync());
+        }
+
+        protected async Task<TResult> ExecuteScalarAsync<TResult>(
+            string query,
+            List<QueryParameter> parameters)
+        {
+            object? result = await RunAsync(query, parameters, command => command.ExecuteScalarAsync());
+
             if (result == null || result == DBNull.Value)
-            {
                 throw new InvalidOperationException("The query did not return a value.");
-            }
 
-            // I asked AI and tell me that it prefered to use Convert.ChangeType to handle the conversion to TResult, but I think it is better to use a direct cast since we expect the result to be of type TResult. If the result is not of type TResult, it will throw an InvalidCastException, which is more appropriate in this context. so what do you think ??
+            // Direct cast on purpose: a wrong type fails loudly (InvalidCastException).
             return (TResult)result;
         }
-
     }
-}
+}       

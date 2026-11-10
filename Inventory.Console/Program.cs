@@ -1,11 +1,7 @@
-﻿using Inventory.DataAccess.Database;
-using Inventory.DataAccess.Repositories;
-using Microsoft.Data.SqlClient;
-using Inventory.Domain.Repository_Interfaces;
-using System;
-using System.Threading.Tasks;
+﻿using Inventory.DataAccess.Repositories;
 using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Products;
+using Inventory.Domain.Repository_Interfaces;
 
 class Program
 {
@@ -52,6 +48,10 @@ class Program
     }
     static async Task Main(string[] args)
     {
-        await TestTransactionAsync();
+        for (int i = 0; i < 1000; i++)
+        {
+            await TestTransactionAsync();
+            Console.WriteLine(i);
+        }
     }
 }
