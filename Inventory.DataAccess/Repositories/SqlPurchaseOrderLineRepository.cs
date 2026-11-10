@@ -1,5 +1,6 @@
 ﻿using Inventory.DataAccess.Database;
 using Inventory.DataAccess.General_abstract;
+using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Contacts;
 using Inventory.Domain.Orders.Invoices;
 using Inventory.Domain.Orders.Lines;
@@ -13,6 +14,11 @@ namespace Inventory.DataAccess.Repositories;
 public class SqlPurchaseOrderLineRepository
     : SqlRepositoryBase<PurchaseOrderLine>, IPurchaseOrderLineRepository
 {
+    public SqlPurchaseOrderLineRepository(SqlUnitOfWork unitOfWork)
+: base(unitOfWork)
+    {
+    }
+
     private const string SelectQuery = @"
         SELECT
             pol.PurchaseOrderLineID,

@@ -1,5 +1,6 @@
 ﻿using Inventory.DataAccess.Database;
 using Inventory.DataAccess.General_abstract;
+using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Contacts;
 using Inventory.Domain.Orders.Invoices;
 using Inventory.Domain.Orders.Lines;
@@ -11,6 +12,11 @@ using System.Data;
 public class SqlSalesOrderLineRepository
     : SqlRepositoryBase<SalesOrderLine>, ISalesOrderLineRepository
 {
+    public SqlSalesOrderLineRepository(SqlUnitOfWork unitOfWork)
+: base(unitOfWork)
+    {
+    }
+
 
     private const string BaseSelect = @"
     SELECT

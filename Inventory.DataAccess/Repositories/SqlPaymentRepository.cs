@@ -1,4 +1,5 @@
 ﻿using Inventory.DataAccess.General_abstract;
+using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Contacts;
 using Inventory.Domain.Orders.Invoices;
 using Inventory.Domain.Orders.Invoices.Interfaces;
@@ -13,6 +14,11 @@ namespace Inventory.DataAccess.Repositories;
 public class SqlPaymentRepository
     : SqlRepositoryBase<Payment>, IPaymentRepository
 {
+    public SqlPaymentRepository(SqlUnitOfWork unitOfWork)
+: base(unitOfWork)
+    {
+    }
+
     private const string SelectQuery = @"
         SELECT
             pay.PaymentID,

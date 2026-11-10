@@ -1,4 +1,5 @@
 ﻿using Inventory.DataAccess.General_abstract;
+using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Contacts;
 using Inventory.Domain.Orders.Invoices;
 using Inventory.Domain.Repository_Interfaces;
@@ -10,6 +11,11 @@ namespace Inventory.DataAccess.Repositories;
 public class SqlSaleInvoiceRepository
     : SqlRepositoryBase<SalesInvoice>, ISaleInvoiceRepository
 {
+    public SqlSaleInvoiceRepository(SqlUnitOfWork unitOfWork)
+: base(unitOfWork)
+    {
+    }
+
     private const string SelectQuery = @"
         SELECT
             si.SalesInvoiceID,

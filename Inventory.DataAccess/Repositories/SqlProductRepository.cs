@@ -1,4 +1,5 @@
 ﻿using Inventory.DataAccess.General_abstract;
+using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Products;
 using Inventory.Domain.Repository_Interfaces;
 using Microsoft.Data.SqlClient;
@@ -8,6 +9,10 @@ namespace Inventory.DataAccess.Repositories
 {
     public class SqlProductRepository :SqlRepositoryBase<Product>, IProductRepository
     {
+        public SqlProductRepository(SqlUnitOfWork unitOfWork)
+            : base(unitOfWork)
+        {
+        }
         protected override Product BuildTable(SqlDataReader reader)
         {
             int Id = (int)reader["ProductID"];

@@ -1,5 +1,6 @@
 ﻿
 using Inventory.DataAccess.General_abstract;
+using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Contacts;
 using Inventory.Domain.Repository_Interfaces;
 using Microsoft.Data.SqlClient;
@@ -9,7 +10,13 @@ namespace Inventory.DataAccess.Repositories
 {
     public class SqlClientRepository
         : SqlRepositoryBase<Client>, IClientRepository
+
     {
+        public SqlClientRepository(SqlUnitOfWork unitOfWork)
+        : base(unitOfWork)
+        {
+        }
+
         protected override Client BuildTable(SqlDataReader reader)
         {
             Client client = new (

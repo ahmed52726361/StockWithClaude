@@ -1,5 +1,6 @@
 ﻿
 using Inventory.DataAccess.General_abstract;
+using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Contacts;
 using Inventory.Domain.Repository_Interfaces;
 using Microsoft.Data.SqlClient;
@@ -10,6 +11,11 @@ namespace Inventory.DataAccess.Repositories
     public class SqlSupplierRepository
         : SqlRepositoryBase<Supplier>, ISupplierRepository
     {
+        public SqlSupplierRepository(SqlUnitOfWork unitOfWork)
+: base(unitOfWork)
+        {
+        }
+
         private const string SelectQuery = @"
             SELECT SupplierID, Name, Address, Email, PhoneNumber
             FROM Suppliers";
