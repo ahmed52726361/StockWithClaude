@@ -1,4 +1,5 @@
-﻿using Inventory.Domain.Products;
+﻿using Inventory.Application.Exceptions;
+using Inventory.Domain.Products;
 
 namespace Inventory.Application.Tests
 {

@@ -80,7 +80,6 @@ public class SqlSalesOrderLineRepository
             WHERE SalesInvoiceID = @SalesInvoiceID
         )
         WHERE SalesInvoiceID = @SalesInvoiceID;";
-
         using SqlConnection connection =
             SqlConnectionFactory.CreateConnection();
 

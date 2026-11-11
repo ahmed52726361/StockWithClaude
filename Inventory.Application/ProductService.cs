@@ -1,5 +1,6 @@
 ﻿using Inventory.Domain.Repository_Interfaces;
 using Inventory.Domain.Products;
+using Inventory.Application.Exceptions;
 
 namespace Inventory.Application
 {
@@ -70,6 +71,11 @@ namespace Inventory.Application
             product.ChangePrice(newPrice);
             return await _productRepository.UpdateAsync(product);
             
+        }
+
+        public  async Task<bool> IsProductExcist(Product product)
+        {
+            return await FindProductAsync(product.Id)!=null;
         }
     }
 }

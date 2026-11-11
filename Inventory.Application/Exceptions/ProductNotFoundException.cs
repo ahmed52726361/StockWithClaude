@@ -1,4 +1,4 @@
-﻿namespace Inventory.Application
+﻿namespace Inventory.Application.Exceptions
 {
     public class ProductNotFoundException:Exception
     {
