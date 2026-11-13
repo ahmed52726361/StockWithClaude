@@ -13,7 +13,7 @@ namespace Inventory.Application
         }
         public async Task<int> AddClientAsync(Client client)
         {
-            if (_clientRepository.GetByIdAsync(client.Id)!=null)
+            if (await _clientRepository.GetByIdAsync(client.Id)!=null)
             {
                 throw new DuplicateClientException(client.Id);
             }

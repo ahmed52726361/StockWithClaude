@@ -8,5 +8,6 @@ namespace Inventory.Domain.Repository_Interfaces
         Task<IReadOnlyList<Product>> FindLowStockAsync(int threshold);
         Task<bool> UpdateAsync(Product product);
 
+
     }
 }

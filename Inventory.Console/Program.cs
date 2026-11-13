@@ -13,29 +13,30 @@ class Program
         SqlProductRepository sqlProductRepository=new(unitOfWork);
         SqlSaleInvoiceRepository sqlSaleInvoiceRepository=new(unitOfWork);
         SqlSalesOrderLineRepository sqlSalesOrderLineRepository = new(unitOfWork);
-        CompletedSaleInvoiceWithOrderLines completedSaleInvoiceWithOrderLines = new(unitOfWork, sqlSaleInvoiceRepository, sqlProductRepository, sqlClientRepository, sqlSalesOrderLineRepository);
-        List<ListProductsToSale> products = new()
+        ClientService clientService = new(sqlClientRepository);
+        SalesTransactionService salesTransactionService = new(sqlProductRepository, unitOfWork, clientService,sqlSaleInvoiceRepository, sqlSalesOrderLineRepository);
+        List<SaleItem> products = new()
         {
-            new ListProductsToSale
+            new SaleItem
             {
                 ProductID = 1,
                 OrderQuantity = 2,
                 ProductPrice = 15.99m
             },
-            new ListProductsToSale
+            new SaleItem
             {
                 ProductID = 3,
                 OrderQuantity = 1,
                 ProductPrice = 24.50m
             },
-            new ListProductsToSale
+            new SaleItem
             {
                 ProductID = 5,
                 OrderQuantity = 2,
                 ProductPrice = 9.75m
             }
         };
-       return await completedSaleInvoiceWithOrderLines.CreateSaleInvoiceWithOrderLines(1, products);
+       return await salesTransactionService.SellProductsAsync(1, products);
 
     }
 

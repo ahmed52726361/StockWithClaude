@@ -22,7 +22,7 @@ namespace Inventory.DataAccess.General_abstract
             List<QueryParameter> parameters,
             Func<SqlCommand, Task<TResult>> action)
         {
-            SqlConnection connection;
+            SqlConnection? connection;
             SqlTransaction? transaction;
             bool ownsConnection;
 

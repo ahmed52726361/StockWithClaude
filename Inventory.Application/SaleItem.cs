@@ -1,8 +1,6 @@
-﻿using Inventory.Domain.Products;
-
-namespace Inventory.Application
+﻿namespace Inventory.Application
 {
-    public class ListProductsToSale
+    public class SaleItem
     {
         public int ProductID { get; set; }
         public int OrderQuantity { get; set; }

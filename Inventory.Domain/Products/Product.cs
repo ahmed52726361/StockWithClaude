@@ -63,6 +63,17 @@
 
                 StockQty = checked(StockQty + quantity);
             }
+            public void ReduceStock(int quantity)
+            {
+                if (quantity <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(quantity),
+                        "Quantity must be positive.");
+                }
+
+                StockQty = checked(StockQty - quantity);
+            }
 
             public void Sale(int quantity)
             {

@@ -48,7 +48,7 @@ namespace Inventory.Application.Tests
         [Fact]
         public async Task RestockProductAsync_ProductDoesNotExist_ThrowsProductNotFoundException()
         {
-            await Assert.ThrowsAnyAsync<ProductNotFoundException>(() => _productService.RestockProductAsync(1, 1));
+            await Assert.ThrowsAnyAsync<ProductNotFoundException>(async () =>await _productService.RestockProductAsync(1, 1));
         }
         [Fact]
         public async Task RestockProductAsync_AddQuantity_ReturnsCorrectedQuantityInStock()
@@ -81,6 +81,12 @@ namespace Inventory.Application.Tests
             Assert.True(result);
             Assert.NotNull(Reloaded);
             Assert.Equal(3m,Reloaded.Price);
+        }
+        [Fact]
+        public async Task UpdateProductAsync_ProductNotExist_throwProductNotFoundException()
+        {
+            Product product = new("test", 14m, 7);
+            await Assert.ThrowsAnyAsync<ProductNotFoundException>(async ()=>await _productService.UpdateProductAsync(product));
         }
 
 
