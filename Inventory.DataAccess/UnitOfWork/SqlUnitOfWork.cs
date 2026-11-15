@@ -5,16 +5,17 @@ using Microsoft.Data.SqlClient;
 namespace Inventory.DataAccess.UnitOfWork
 {
     public class SqlUnitOfWork : IUnitOfWork
-    {
+    { 
         internal SqlConnection? _connection;
         internal SqlTransaction? _transaction;
         internal bool HasActiveTransaction {  get;private set; }
         public async Task BeginTransactionAsync()
         {
-            _connection = SqlConnectionFactory.CreateConnection();
-            if (_transaction != null)
+            if (_transaction != null||_connection!=null)
                 throw new InvalidOperationException("Transaction has started already.");
 
+
+            _connection = SqlConnectionFactory.CreateConnection();
             await _connection.OpenAsync();
             _transaction=(SqlTransaction)await _connection.BeginTransactionAsync();
              HasActiveTransaction = true;
@@ -24,14 +25,21 @@ namespace Inventory.DataAccess.UnitOfWork
         {
             if (_transaction == null)
                 throw new InvalidOperationException("Transaction has not been started.");
-            await _transaction.CommitAsync();
-            await _connection.CloseAsync();
-            _transaction=null;
-            _connection=null;
-            HasActiveTransaction= false;
 
+            try
+            {
+                await _transaction.CommitAsync();
+            }
+            finally
+            {
+                await _transaction.DisposeAsync();
+                await _connection!.DisposeAsync();
+
+                _transaction = null;
+                _connection = null;
+                HasActiveTransaction = false;
+            }
         }
-
         public async ValueTask DisposeAsync()
         {
             if (_transaction != null)
@@ -45,11 +53,20 @@ namespace Inventory.DataAccess.UnitOfWork
         {
             if (_transaction == null)
                 throw new InvalidOperationException("Transaction has not been started.");
-            await _transaction.RollbackAsync();
-            await _connection.CloseAsync();
-            _transaction=null;
-            _connection=null;
-            HasActiveTransaction = false;
+
+            try
+            {
+                await _transaction.RollbackAsync();
+            }
+            finally
+            {
+                await _transaction.DisposeAsync();
+                await _connection!.DisposeAsync();
+
+                _transaction = null;
+                _connection = null;
+                HasActiveTransaction = false;
+            }
         }
     }
 }

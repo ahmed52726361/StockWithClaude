@@ -68,7 +68,7 @@ public class SqlSalesOrderLineRepository
             @ProductID,
             @OrderQty,
             @OrderPrice
-        );
+        ); 
 
         SELECT CAST(SCOPE_IDENTITY() AS int);";
 
@@ -81,75 +81,6 @@ public class SqlSalesOrderLineRepository
             WHERE SalesInvoiceID = @SalesInvoiceID
         )
         WHERE SalesInvoiceID = @SalesInvoiceID;";
-        if (!(_unitofwork != null || _unitofwork.HasActiveTransaction))
-        {
-            using SqlConnection connection =
-        SqlConnectionFactory.CreateConnection();
-
-            await connection.OpenAsync();
-
-            using SqlTransaction transaction =
-                (SqlTransaction)await connection.BeginTransactionAsync();
-
-            try
-            {
-                int id;
-
-                using (SqlCommand insertCommand =
-                    new(insertQuery, connection, transaction))
-                {
-                    insertCommand.Parameters.Add(
-                        "@SalesInvoiceID", SqlDbType.Int).Value = item.Invoice.Id;
-
-                    insertCommand.Parameters.Add(
-                        "@ProductID", SqlDbType.Int).Value = item.Product.Id;
-
-                    insertCommand.Parameters.Add(
-                        "@OrderQty", SqlDbType.Int).Value = item.Qty;
-
-                    SqlParameter priceParameter =
-                        insertCommand.Parameters.Add(
-                            "@OrderPrice", SqlDbType.Decimal);
-
-                    priceParameter.Precision = 10;
-                    priceParameter.Scale = 2;
-                    priceParameter.Value = item.OrderPrice;
-
-                    object? result = await insertCommand.ExecuteScalarAsync();
-
-                    if (result is null || result == DBNull.Value)
-                    {
-                        throw new InvalidOperationException(
-                            "Failed to retrieve the generated sales order line ID.");
-                    }
-
-                    id = Convert.ToInt32(result);
-                }
-
-                using (SqlCommand updateCommand =
-                    new(updateTotalQuery, connection, transaction))
-                {
-                    updateCommand.Parameters.Add(
-                        "@SalesInvoiceID", SqlDbType.Int).Value = item.Invoice.Id;
-
-                    await updateCommand.ExecuteNonQueryAsync();
-                }
-
-                await transaction.CommitAsync();
-
-                item.SetId(id);
-
-                return id;
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-
-        }
-        else
-        {
             List<QueryParameter> parameters = new()
             {
                 new("@SalesInvoiceID", SqlDbType.Int, item.Invoice.Id),
@@ -157,8 +88,10 @@ public class SqlSalesOrderLineRepository
                 new("@OrderQty", SqlDbType.Int, item.Qty),
                 new("@OrderPrice", SqlDbType.Decimal, item.OrderPrice)
             };
-            return await base.ExecuteScalarAsync<int>(insertQuery, parameters);
-        }
+            int id= await base.ExecuteScalarAsync<int>(insertQuery, parameters);
+            item.SetId(id);
+
+            return id;
     }
 
     public async Task<bool> DeleteAsync(int id)

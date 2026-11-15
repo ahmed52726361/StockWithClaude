@@ -82,6 +82,7 @@ namespace Inventory.Application
                 foreach (Product product in products.Values)
                     await _productService.UpdateProductAsync(product);
 
+                //throw new Exception("test");
                 await _unitOfWork.CommitAsync();
 
                 return invoiceId;

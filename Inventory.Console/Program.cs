@@ -20,7 +20,7 @@ class Program
             new SaleItem
             {
                 ProductID = 1,
-                OrderQuantity = 2,
+                OrderQuantity = 1,
                 ProductPrice = 15.99m
             },
             new SaleItem
@@ -32,12 +32,20 @@ class Program
             new SaleItem
             {
                 ProductID = 5,
-                OrderQuantity = 2,
+                OrderQuantity = 1,
                 ProductPrice = 9.75m
             }
         };
-       return await salesTransactionService.SellProductsAsync(1, products);
+        int firstInvoiceId =
+            await salesTransactionService.SellProductsAsync(1, products);
 
+        int secondInvoiceId =
+            await salesTransactionService.SellProductsAsync(1, products);
+
+        Console.WriteLine($"First Invoice: {firstInvoiceId}");
+        Console.WriteLine($"Second Invoice: {secondInvoiceId}");
+
+        return secondInvoiceId;
     }
 
     public static async Task TestTransactionAsync()
@@ -97,14 +105,6 @@ class Program
     }
     static async Task Main(string[] args)
     {
-        if (await TestTransactionAddSaleInvoiceWithOrderLines()>0)
-        {
-            Console.WriteLine("Transaction works successfully");
-        }
-        else
-        {
-            Console.WriteLine("Transaction not working");
-            
-        }
+        await TestTransactionAddSaleInvoiceWithOrderLines();
     }
 }
