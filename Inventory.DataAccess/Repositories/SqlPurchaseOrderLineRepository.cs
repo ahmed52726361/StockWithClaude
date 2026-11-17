@@ -115,68 +115,18 @@ public class SqlPurchaseOrderLineRepository
         )
         WHERE PurchaseInvoiceID = @InvoiceID;";
 
-        using SqlConnection connection =
-            SqlConnectionFactory.CreateConnection();
+        List<QueryParameter> parameters = new()
+         {
+             new("@InvoiceID", SqlDbType.Int, item.Invoice.Id),
+            new("@ProductID", SqlDbType.Int, item.Product.Id),
+            new("@Qty", SqlDbType.Int, item.Qty),
+            new("@Price", SqlDbType.Decimal, item.OrderPrice)
+         };
+        int id = await ExecuteScalarAsync<int>(insertQuery, parameters);
+        item.SetId(id);
+        return id;
 
-        await connection.OpenAsync();
 
-        using SqlTransaction transaction =
-            (SqlTransaction)await connection.BeginTransactionAsync();
-
-        try
-        {
-            int id;
-
-            using (SqlCommand insertCommand =
-                new(insertQuery, connection, transaction))
-            {
-                insertCommand.Parameters.Add(
-                    "@InvoiceID", SqlDbType.Int).Value = item.Invoice.Id;
-
-                insertCommand.Parameters.Add(
-                    "@ProductID", SqlDbType.Int).Value = item.Product.Id;
-
-                insertCommand.Parameters.Add(
-                    "@Qty", SqlDbType.Int).Value = item.Qty;
-
-                SqlParameter price = insertCommand.Parameters.Add(
-                    "@Price", SqlDbType.Decimal);
-
-                price.Precision = 10;
-                price.Scale = 2;
-                price.Value = item.OrderPrice;
-
-                object? result = await insertCommand.ExecuteScalarAsync();
-
-                if (result is null || result == DBNull.Value)
-                {
-                    throw new InvalidOperationException(
-                        "Failed to retrieve the generated purchase order line ID.");
-                }
-
-                id = Convert.ToInt32(result);
-            }
-
-            using (SqlCommand updateCommand =
-                new(updateTotalQuery, connection, transaction))
-            {
-                updateCommand.Parameters.Add(
-                    "@InvoiceID", SqlDbType.Int).Value = item.Invoice.Id;
-
-                await updateCommand.ExecuteNonQueryAsync();
-            }
-
-            await transaction.CommitAsync();
-
-            item.SetId(id);
-
-            return id;
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
     }
 
     public async Task<bool> DeleteAsync(int id)

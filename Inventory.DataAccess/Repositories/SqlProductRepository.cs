@@ -1,10 +1,10 @@
 ﻿using Inventory.DataAccess.General_abstract;
 using Inventory.DataAccess.UnitOfWork;
 using Inventory.Domain.Products;
+using Inventory.Domain.Products.Exceptions;
 using Inventory.Domain.Repository_Interfaces;
 using Microsoft.Data.SqlClient;
 using System.Data;
-
 namespace Inventory.DataAccess.Repositories
 {
     public class SqlProductRepository :SqlRepositoryBase<Product>, IProductRepository
@@ -33,9 +33,17 @@ namespace Inventory.DataAccess.Repositories
             paramaters.Add(new QueryParameter("@Name",SqlDbType.NVarChar,item.Name));
             paramaters.Add(new QueryParameter("@StockQty", SqlDbType.Int,item.StockQty));
             paramaters.Add(new QueryParameter("@Price", SqlDbType.Decimal,item.Price));
-            int id = await ExecuteScalarAsync<int>(query, paramaters);
-            item.SetId(id);
-            return id;
+
+            try
+            {
+                int id = await ExecuteScalarAsync<int>(query, paramaters);
+                item.SetId(id);
+                return id;
+            }
+            catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+            {
+                throw new DuplicateProductNameException(item.Name, ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)

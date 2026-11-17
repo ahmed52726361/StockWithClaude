@@ -87,7 +87,7 @@ namespace Inventory.Application
         public async Task ReduceInventoryAsync(int productId, int quantity)
         {
             Product product = await FindProductAsync(productId);
-            if(!await _productRepository.TryReduceStockAsync(productId, quantity))
+            if (!await _productRepository.TryReduceStockAsync(productId, quantity))
                 throw new InsufficientStockException(productId, quantity, product.StockQty);
         }
 

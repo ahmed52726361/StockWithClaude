@@ -28,7 +28,7 @@ class Program
             new SaleItem
             {
                 ProductID = 1,
-                OrderQuantity = 1,
+                OrderQuantity = 6,
                 ProductPrice = 15.99m
             }
         };
@@ -48,7 +48,7 @@ class Program
             new SaleItem
             {
                 ProductID = 1,
-                OrderQuantity = 1,
+                OrderQuantity = 6,
                 ProductPrice = 15.99m
             }
         };
