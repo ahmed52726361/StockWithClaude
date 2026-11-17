@@ -1,4 +1,5 @@
-﻿namespace Inventory.Domain.Products
+﻿using Inventory.Domain.Products.Exceptions;
+namespace Inventory.Domain.Products
     {
         public class Product : ISummarizable, IReceivesDatabaseId
         {
@@ -63,17 +64,6 @@
 
                 StockQty = checked(StockQty + quantity);
             }
-            public void ReduceStock(int quantity)
-            {
-                if (quantity <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(quantity),
-                        "Quantity must be positive.");
-                }
-
-                StockQty = checked(StockQty - quantity);
-            }
 
             public void Sale(int quantity)
             {
@@ -86,11 +76,10 @@
 
                 if (quantity > StockQty)
                 {
-                    throw new InvalidOperationException(
-                        "Insufficient stock.");
+                    throw new InsufficientStockException(Id, quantity, StockQty);
                 }
 
-                StockQty -= quantity;
+            StockQty -= quantity;
             }
 
             public string GetSummary()

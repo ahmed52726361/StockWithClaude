@@ -1,5 +1,6 @@
 ﻿using Inventory.Application.Exceptions;
 using Inventory.Domain.Products;
+using Inventory.Domain.Products.Exceptions;
 
 namespace Inventory.Application.Tests
 {
@@ -88,8 +89,26 @@ namespace Inventory.Application.Tests
             Product product = new("test", 14m, 7);
             await Assert.ThrowsAnyAsync<ProductNotFoundException>(async ()=>await _productService.UpdateProductAsync(product));
         }
+        [Fact]
+        public async Task ReduceInventoryAsync_NotEnoughStock_ThrowsInsufficientStockException()
+        {
+            int id = await AddHandBagAsync(stock: 5);
 
+            await Assert.ThrowsAsync<InsufficientStockException>(
+                () => _productService.ReduceInventoryAsync(id, 6));
+        }
 
+        [Fact]
+        public async Task ReduceInventoryAsync_EnoughStock_ReducesStoredStock()
+        {
+            int id = await AddHandBagAsync(stock: 5);
+
+            await _productService.ReduceInventoryAsync(id, 2);
+
+            Product? reloaded = await _repository.GetByIdAsync(id);
+            Assert.NotNull(reloaded);
+            Assert.Equal(3, reloaded.StockQty);
+        }
 
     }
 }

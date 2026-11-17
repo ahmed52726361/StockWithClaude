@@ -72,13 +72,16 @@ namespace Inventory.Application.Tests
         public Task<bool> TryReduceStockAsync(int productId, int quantity)
         {
             int index = _products.FindIndex(x => x.Id == productId);
-            if (index == -1)
-            {
+
+            // Same as the SQL: 0 rows are changed if the product is missing or the stock is too low
+            if (index == -1 || _products[index].StockQty < quantity)
                 return Task.FromResult(false);
-            }
-            Product product = _products[index];
-            product.ReduceStock(quantity);
-            _products[index] = Copy(product);
+
+            // Same as the SQL: StockQty = StockQty - @Quantity (no business rule, no exception)
+            Product updated = Copy(_products[index]);
+            updated.Sale(quantity);
+            _products[index] = updated;
+
             return Task.FromResult(true);
         }
     }

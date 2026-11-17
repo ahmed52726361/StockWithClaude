@@ -1,7 +1,8 @@
 ﻿
-using Inventory.Domain.Repository_Interfaces;
-using Inventory.Domain.Products;
 using Inventory.Application.Exceptions;
+using Inventory.Domain.Products;
+using Inventory.Domain.Products.Exceptions;
+using Inventory.Domain.Repository_Interfaces;
 
 namespace Inventory.Application
 {
@@ -83,9 +84,11 @@ namespace Inventory.Application
         /// <exception cref="ProductNotFoundException">
         /// Thrown when the specified product cannot be found.
         /// </exception>
-        public async Task<bool> ReduceInventoryAsync(int productId, int quantity)
+        public async Task ReduceInventoryAsync(int productId, int quantity)
         {
-            return await _productRepository.TryReduceStockAsync(productId, quantity);
+            Product product = await FindProductAsync(productId);
+            if(!await _productRepository.TryReduceStockAsync(productId, quantity))
+                throw new InsufficientStockException(productId, quantity, product.StockQty);
         }
 
         /// <summary>Changes a product's price.</summary>

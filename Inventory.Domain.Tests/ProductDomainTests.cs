@@ -1,4 +1,5 @@
 ﻿using Inventory.Domain.Products;
+using Inventory.Domain.Products.Exceptions;
 
 namespace Inventory.Domain.Tests
 {
@@ -144,10 +145,10 @@ namespace Inventory.Domain.Tests
             Assert.Equal(0, product.StockQty);
         }
         [Fact]
-        public void Sale_QuantityGreaterThanStock_ThrowsInvalidOperationException()
+        public void Sale_QuantityGreaterThanStock_ThrowsInsufficientStockException()
         {
             Product product = new("Test", 10m, 5);
-            Assert.Throws<InvalidOperationException>(()=>product.Sale(6));
+            Assert.Throws<InsufficientStockException>(()=>product.Sale(6));
         }
         [Theory]
         [InlineData(0)]

@@ -55,10 +55,12 @@ namespace Inventory.Application
                     
                     products[item.ProductID] = product;
                     OrderQty[item.ProductID] = item.OrderQuantity;
-                }else
+                }
+                else
                 {
                     OrderQty[item.ProductID] += item.OrderQuantity;
                 }
+                product.Sale(item.OrderQuantity);
 
                 SalesOrderLine line = new(
                     invoice,
@@ -83,10 +85,8 @@ namespace Inventory.Application
                 }
                 foreach (var product in products.Values)
                 {
-                    if (!await _productService.ReduceInventoryAsync(product.Id, OrderQty[product.Id]))
-                    {
-                      throw new Exception("Not enough stock for product: " + product.Name);  
-                    }
+                    await _productService.ReduceInventoryAsync(product.Id, OrderQty[product.Id]);
+                        
                 }
 
 
