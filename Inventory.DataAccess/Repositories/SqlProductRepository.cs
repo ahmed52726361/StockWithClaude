@@ -100,5 +100,19 @@ namespace Inventory.DataAccess.Repositories
                 return await ExecuteAsync(query, parameters) > 0;
 
         }
+
+        public async Task<bool> TryReduceStockAsync(int productId, int quantity)
+        {
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(productId, 0, nameof(productId));
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(quantity, 0, nameof(quantity));
+            string query = "UPDATE Products SET StockQty = StockQty - @Quantity WHERE ProductID = @ProductID AND StockQty >= @Quantity;";
+                List<QueryParameter> parameters = new List<QueryParameter>
+                {
+                    new("@Quantity",SqlDbType.Int,quantity),
+                    new("@ProductID",SqlDbType.Int,productId)
+                };
+                return await ExecuteAsync(query, parameters) > 0;
+            
+        }
     }
 }

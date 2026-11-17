@@ -44,19 +44,21 @@ namespace Inventory.Application
 
             List<SalesOrderLine> lines = new();
 
-            // Each product is loaded only once.
             Dictionary<int, Product> products = new();
-                
+            Dictionary<int, int> OrderQty = new();
+
             foreach (SaleItem item in items)
             {
                 if (!products.TryGetValue(item.ProductID, out Product? product))
                 {
                     product = await _productService.FindProductAsync(item.ProductID);
+                    
                     products[item.ProductID] = product;
+                    OrderQty[item.ProductID] = item.OrderQuantity;
+                }else
+                {
+                    OrderQty[item.ProductID] += item.OrderQuantity;
                 }
-
-                // Checks stock and reduces it in memory.
-                product.Sale(item.OrderQuantity);
 
                 SalesOrderLine line = new(
                     invoice,
@@ -69,7 +71,6 @@ namespace Inventory.Application
             }
 
             // PHASE 2: Perform all database writes in one transaction.
-
             await _unitOfWork.BeginTransactionAsync();
 
             try
@@ -77,10 +78,17 @@ namespace Inventory.Application
                 int invoiceId = await _saleInvoiceRepository.AddAsync(invoice);
 
                 foreach (SalesOrderLine line in lines)
+                {
                     await _salesOrderLineRepository.AddAsync(line);
+                }
+                foreach (var product in products.Values)
+                {
+                    if (!await _productService.ReduceInventoryAsync(product.Id, OrderQty[product.Id]))
+                    {
+                      throw new Exception("Not enough stock for product: " + product.Name);  
+                    }
+                }
 
-                foreach (Product product in products.Values)
-                    await _productService.UpdateProductAsync(product);
 
                 //throw new Exception("test");
                 await _unitOfWork.CommitAsync();

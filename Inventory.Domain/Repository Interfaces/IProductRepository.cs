@@ -7,7 +7,7 @@ namespace Inventory.Domain.Repository_Interfaces
         Task <Product?> FindByNameAsync(string name);
         Task<IReadOnlyList<Product>> FindLowStockAsync(int threshold);
         Task<bool> UpdateAsync(Product product);
-
+        Task<bool> TryReduceStockAsync(int productId, int quantity);
 
     }
 }

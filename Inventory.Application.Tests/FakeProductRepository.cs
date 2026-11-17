@@ -68,5 +68,18 @@ namespace Inventory.Application.Tests
             IReadOnlyList<Product> result=_products.Select(Copy).ToList();
             return Task.FromResult(result);
         }
+
+        public Task<bool> TryReduceStockAsync(int productId, int quantity)
+        {
+            int index = _products.FindIndex(x => x.Id == productId);
+            if (index == -1)
+            {
+                return Task.FromResult(false);
+            }
+            Product product = _products[index];
+            product.ReduceStock(quantity);
+            _products[index] = Copy(product);
+            return Task.FromResult(true);
+        }
     }
 }

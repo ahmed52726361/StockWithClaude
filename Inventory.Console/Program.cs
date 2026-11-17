@@ -6,15 +6,23 @@ using Inventory.Domain.Repository_Interfaces;
 
 class Program
 {
-    public static async Task<int> TestTransactionAddSaleInvoiceWithOrderLines()
+    private static SalesTransactionService CreateSalesTransactionService(SqlUnitOfWork unitOfWork)
     {
-        SqlUnitOfWork unitOfWork = new SqlUnitOfWork();
-        SqlClientRepository sqlClientRepository=new(unitOfWork);
-        SqlProductRepository sqlProductRepository=new(unitOfWork);
-        SqlSaleInvoiceRepository sqlSaleInvoiceRepository=new(unitOfWork);
+        SqlClientRepository sqlClientRepository = new(unitOfWork);
+        SqlProductRepository sqlProductRepository = new(unitOfWork);
+        SqlSaleInvoiceRepository sqlSaleInvoiceRepository = new(unitOfWork);
         SqlSalesOrderLineRepository sqlSalesOrderLineRepository = new(unitOfWork);
         ClientService clientService = new(sqlClientRepository);
-        SalesTransactionService salesTransactionService = new(sqlProductRepository, unitOfWork, clientService,sqlSaleInvoiceRepository, sqlSalesOrderLineRepository);
+        return new SalesTransactionService(
+            sqlProductRepository,
+            unitOfWork,
+            clientService,
+            sqlSaleInvoiceRepository,
+            sqlSalesOrderLineRepository);
+    }
+    public static async Task<int> ServiceA()
+    {
+        SalesTransactionService salesTransactionService =CreateSalesTransactionService(new SqlUnitOfWork());
         List<SaleItem> products = new()
         {
             new SaleItem
@@ -22,30 +30,35 @@ class Program
                 ProductID = 1,
                 OrderQuantity = 1,
                 ProductPrice = 15.99m
-            },
-            new SaleItem
-            {
-                ProductID = 3,
-                OrderQuantity = 1,
-                ProductPrice = 24.50m
-            },
-            new SaleItem
-            {
-                ProductID = 5,
-                OrderQuantity = 1,
-                ProductPrice = 9.75m
             }
         };
-        int firstInvoiceId =
+
+        int ID =
             await salesTransactionService.SellProductsAsync(1, products);
 
-        int secondInvoiceId =
+        Console.WriteLine($"Second Invoice: {ID}");
+
+        return ID;
+    }
+    public static async Task<int> ServiceB()
+    {
+        SalesTransactionService salesTransactionService =CreateSalesTransactionService(new SqlUnitOfWork());
+        List<SaleItem> products = new()
+        {
+            new SaleItem
+            {
+                ProductID = 1,
+                OrderQuantity = 1,
+                ProductPrice = 15.99m
+            }
+        };
+
+        int ID =
             await salesTransactionService.SellProductsAsync(1, products);
 
-        Console.WriteLine($"First Invoice: {firstInvoiceId}");
-        Console.WriteLine($"Second Invoice: {secondInvoiceId}");
+        Console.WriteLine($"Second Invoice: {ID}");
 
-        return secondInvoiceId;
+        return ID;
     }
 
     public static async Task TestTransactionAsync()
@@ -105,6 +118,6 @@ class Program
     }
     static async Task Main(string[] args)
     {
-        await TestTransactionAddSaleInvoiceWithOrderLines();
+        await Task.WhenAll(ServiceA(), ServiceB());
     }
 }

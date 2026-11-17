@@ -63,7 +63,6 @@ namespace Inventory.Application
                 throw new ProductNotFoundException(product.Id);
             return updated;
         }
-
         /// <summary>Adds quantity to a product's stock.</summary>
         /// <exception cref="ProductNotFoundException">
         /// Thrown when the specified product cannot be found.
@@ -84,13 +83,9 @@ namespace Inventory.Application
         /// <exception cref="ProductNotFoundException">
         /// Thrown when the specified product cannot be found.
         /// </exception>
-        public async Task ReduceInventoryAsync(int productId, int quantity)
+        public async Task<bool> ReduceInventoryAsync(int productId, int quantity)
         {
-            Product product = await FindProductAsync(productId);
-
-            product.ReduceStock(quantity);
-
-            await UpdateProductAsync(product);
+            return await _productRepository.TryReduceStockAsync(productId, quantity);
         }
 
         /// <summary>Changes a product's price.</summary>
