@@ -15,7 +15,7 @@ namespace Inventory.Domain.Orders.Lines.Abstract
         public decimal OrderPrice { get; }
 
 
-        public AbsOrderLine(
+        public  AbsOrderLine(
             AbsInvoice<TContact> invoice,
             Product product,
             int qty,

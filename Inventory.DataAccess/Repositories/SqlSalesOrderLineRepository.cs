@@ -71,7 +71,12 @@ public class SqlSalesOrderLineRepository
         ); 
 
         SELECT CAST(SCOPE_IDENTITY() AS int);";
-
+        // we don't use it anymore 
+        /*
+         “Lines update the total with an update query” is the old design. Our two-phase flow adds the lines to the invoice before saving it,
+        so the invoice is inserted with the correct TotalAmount from the start. That is why the updateTotalQuery was left unused, 
+        and you can delete it.
+        
         const string updateTotalQuery = @"
         UPDATE SalesInvoices
         SET TotalAmount =
@@ -81,179 +86,180 @@ public class SqlSalesOrderLineRepository
             WHERE SalesInvoiceID = @SalesInvoiceID
         )
         WHERE SalesInvoiceID = @SalesInvoiceID;";
-            List<QueryParameter> parameters = new()
-            {
-                new("@SalesInvoiceID", SqlDbType.Int, item.Invoice.Id),
-                new("@ProductID", SqlDbType.Int, item.Product.Id),
-                new("@OrderQty", SqlDbType.Int, item.Qty),
-                new("@OrderPrice", SqlDbType.Decimal, item.OrderPrice)
-            };
-            int id= await base.ExecuteScalarAsync<int>(insertQuery, parameters);
-            item.SetId(id);
-
-            return id;
-    }
-
-    public async Task<bool> DeleteAsync(int id)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0);
-
-        string query =
-            @"DELETE FROM SalesOrderLines WHERE SalesOrderLineID = @id";
-
+        */
         List<QueryParameter> parameters = new()
-        {
-            new("@id", SqlDbType.Int, id)
-        };
-
-        return await ExecuteAsync(query, parameters) > 0;
-    }
-
-    public async Task<IReadOnlyList<SalesOrderLine>> FindByInvoiceIDAsync(int invoiceID)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(invoiceID, 0);
+        new("@SalesInvoiceID", SqlDbType.Int, item.Invoice.Id),
+        new("@ProductID", SqlDbType.Int, item.Product.Id),
+        new("@OrderQty", SqlDbType.Int, item.Qty),
+        new("@OrderPrice", SqlDbType.Decimal, item.OrderPrice)
+    };
+    int id= await base.ExecuteScalarAsync<int>(insertQuery, parameters);
+    item.SetId(id);
 
-        string query = BaseSelect +
-                       @" WHERE sol.SalesInvoiceID = @invoiceID";
+    return id;
+}
 
-        List<QueryParameter> parameters = new()
-        {
-            new("@invoiceID", SqlDbType.Int, invoiceID)
-        };
+public async Task<bool> DeleteAsync(int id)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0);
 
-        return await QueryAsync(query, parameters, BuildTable);
-    }
+string query =
+    @"DELETE FROM SalesOrderLines WHERE SalesOrderLineID = @id";
 
-    public async Task<IReadOnlyList<SalesOrderLine>> FindByProductIDAsync(int productID)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(productID, 0);
+List<QueryParameter> parameters = new()
+{
+    new("@id", SqlDbType.Int, id)
+};
 
-        string query = BaseSelect +
-                       @" WHERE sol.ProductID = @productID";
+return await ExecuteAsync(query, parameters) > 0;
+}
 
-        List<QueryParameter> parameters = new()
-        {
-            new("@productID", SqlDbType.Int, productID)
-        };
+public async Task<IReadOnlyList<SalesOrderLine>> FindByInvoiceIDAsync(int invoiceID)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(invoiceID, 0);
 
-        return await QueryAsync(query, parameters, BuildTable);
-    }
+string query = BaseSelect +
+               @" WHERE sol.SalesInvoiceID = @invoiceID";
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllAsync()
-    {
-        return await QueryAsync(
-            BaseSelect,
-            new List<QueryParameter>(),
-            BuildTable);
-    }
+List<QueryParameter> parameters = new()
+{
+    new("@invoiceID", SqlDbType.Int, invoiceID)
+};
 
-    public async Task<SalesOrderLine?> GetByIdAsync(int id)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0);
+return await QueryAsync(query, parameters, BuildTable);
+}
 
-        string query = BaseSelect +
-                       @" WHERE sol.SalesOrderLineID = @id";
+public async Task<IReadOnlyList<SalesOrderLine>> FindByProductIDAsync(int productID)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(productID, 0);
 
-        List<QueryParameter> parameters = new()
-        {
-            new("@id", SqlDbType.Int, id)
-        };
+string query = BaseSelect +
+               @" WHERE sol.ProductID = @productID";
 
-        return await QuerySingleAsync(query, parameters, BuildTable);
-    }
+List<QueryParameter> parameters = new()
+{
+    new("@productID", SqlDbType.Int, productID)
+};
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceGreaterThanAsync(decimal price)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(price, 0);
+return await QueryAsync(query, parameters, BuildTable);
+}
 
-        string query = BaseSelect +
-                       @" WHERE sol.OrderPrice > @price";
+public async Task<IReadOnlyList<SalesOrderLine>> GetAllAsync()
+{
+return await QueryAsync(
+    BaseSelect,
+    new List<QueryParameter>(),
+    BuildTable);
+}
 
-        List<QueryParameter> parameters = new()
-        {
-            new("@price", SqlDbType.Decimal, price)
-        };
+public async Task<SalesOrderLine?> GetByIdAsync(int id)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0);
 
-        return await QueryAsync(query, parameters, BuildTable);
-    }
+string query = BaseSelect +
+               @" WHERE sol.SalesOrderLineID = @id";
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceLessThanAsync(decimal price)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(price, 0);
+List<QueryParameter> parameters = new()
+{
+    new("@id", SqlDbType.Int, id)
+};
 
-        string query = BaseSelect +
-                       @" WHERE sol.OrderPrice < @price";
+return await QuerySingleAsync(query, parameters, BuildTable);
+}
 
-        List<QueryParameter> parameters = new()
-        {
-            new("@price", SqlDbType.Decimal, price)
-        };
+public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceGreaterThanAsync(decimal price)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(price, 0);
 
-        return await QueryAsync(query, parameters, BuildTable);
-    }
+string query = BaseSelect +
+               @" WHERE sol.OrderPrice > @price";
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyGreaterThanAsync(int qty)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(qty, 0);
+List<QueryParameter> parameters = new()
+{
+    new("@price", SqlDbType.Decimal, price)
+};
 
-        string query = BaseSelect +
-                       @" WHERE sol.OrderQty > @qty";
+return await QueryAsync(query, parameters, BuildTable);
+}
 
-        List<QueryParameter> parameters = new()
-        {
-            new("@qty", SqlDbType.Int, qty)
-        };
+public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersPriceLessThanAsync(decimal price)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(price, 0);
 
-        return await QueryAsync(query, parameters, BuildTable);
-    }
+string query = BaseSelect +
+               @" WHERE sol.OrderPrice < @price";
 
-    public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyLessThanAsync(int qty)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(qty, 0);
+List<QueryParameter> parameters = new()
+{
+    new("@price", SqlDbType.Decimal, price)
+};
 
-        string query = BaseSelect +
-                       @" WHERE sol.OrderQty < @qty";
+return await QueryAsync(query, parameters, BuildTable);
+}
 
-        List<QueryParameter> parameters = new()
-        {
-            new("@qty", SqlDbType.Int, qty)
-        };
+public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyGreaterThanAsync(int qty)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(qty, 0);
 
-        return await QueryAsync(query, parameters, BuildTable);
-    }
+string query = BaseSelect +
+               @" WHERE sol.OrderQty > @qty";
 
-    protected override SalesOrderLine BuildTable(SqlDataReader reader)
-    {
-        Product product = new(
-            (string)reader["ProductName"],
-            (decimal)reader["Price"],
-            (int)reader["StockQty"]);
+List<QueryParameter> parameters = new()
+{
+    new("@qty", SqlDbType.Int, qty)
+};
 
-        product.SetId((int)reader["ProductID"]);
+return await QueryAsync(query, parameters, BuildTable);
+}
 
-        Client client = new(
-            (bool)reader["PromotionAccept"],
-            (string)reader["ClientName"],
-            (string)reader["Address"],
-            (string)reader["Email"],
-            (string)reader["PhoneNumber"]);
+public async Task<IReadOnlyList<SalesOrderLine>> GetAllOrdersQtyLessThanAsync(int qty)
+{
+ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(qty, 0);
 
-        client.SetId((int)reader["ClientID"]);
+string query = BaseSelect +
+               @" WHERE sol.OrderQty < @qty";
 
-        SalesInvoice invoice = new(client, (DateTime)reader["InvoiceDate"]);
-        invoice.SetId((int)reader["SalesInvoiceID"]);
+List<QueryParameter> parameters = new()
+{
+    new("@qty", SqlDbType.Int, qty)
+};
 
-        byte statusValue = (byte)reader["PaidStatus"];
-        invoice.SetStatus((SalesInvoice.Status)statusValue);
-        
-        SalesOrderLine line = new(
-            invoice,
-            product,
-            (int)reader["OrderQty"],
-            (decimal)reader["OrderPrice"]);
+return await QueryAsync(query, parameters, BuildTable);
+}
 
-        line.SetId((int)reader["SalesOrderLineID"]);
+protected override SalesOrderLine BuildTable(SqlDataReader reader)
+{
+Product product = new(
+    (string)reader["ProductName"],
+    (decimal)reader["Price"],
+    (int)reader["StockQty"]);
 
-        return line;
-    }
+product.SetId((int)reader["ProductID"]);
+
+Client client = new(
+    (bool)reader["PromotionAccept"],
+    (string)reader["ClientName"],
+    (string)reader["Address"],
+    (string)reader["Email"],
+    (string)reader["PhoneNumber"]);
+
+client.SetId((int)reader["ClientID"]);
+
+SalesInvoice invoice = new(client, (DateTime)reader["InvoiceDate"]);
+invoice.SetId((int)reader["SalesInvoiceID"]);
+
+byte statusValue = (byte)reader["PaidStatus"];
+invoice.SetStatus((SalesInvoice.Status)statusValue);
+
+SalesOrderLine line = new(
+    invoice,
+    product,
+    (int)reader["OrderQty"],
+    (decimal)reader["OrderPrice"]);
+
+line.SetId((int)reader["SalesOrderLineID"]);
+
+return line;
+}
 }

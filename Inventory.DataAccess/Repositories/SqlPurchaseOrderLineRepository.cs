@@ -105,16 +105,6 @@ public class SqlPurchaseOrderLineRepository
             @Price
         );";
 
-        const string updateTotalQuery = @"
-        UPDATE PurchaseInvoices
-        SET TotalAmount =
-        (
-            SELECT COALESCE(SUM(OrderQty * OrderPrice), 0)
-            FROM PurchaseOrderLines
-            WHERE PurchaseInvoiceID = @InvoiceID
-        )
-        WHERE PurchaseInvoiceID = @InvoiceID;";
-
         List<QueryParameter> parameters = new()
          {
              new("@InvoiceID", SqlDbType.Int, item.Invoice.Id),

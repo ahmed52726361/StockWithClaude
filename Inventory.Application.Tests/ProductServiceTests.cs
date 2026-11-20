@@ -1,4 +1,5 @@
 ﻿using Inventory.Application.Exceptions;
+using Inventory.Application.Tests.FakeRepo;
 using Inventory.Domain.Products;
 using Inventory.Domain.Products.Exceptions;
 
@@ -49,7 +50,7 @@ namespace Inventory.Application.Tests
         [Fact]
         public async Task RestockProductAsync_ProductDoesNotExist_ThrowsProductNotFoundException()
         {
-            await Assert.ThrowsAnyAsync<ProductNotFoundException>(async () =>await _productService.RestockProductAsync(1, 1));
+            await Assert.ThrowsAnyAsync<ProductNotFoundException>( () => _productService.RestockProductAsync(1, 1));
         }
         [Fact]
         public async Task RestockProductAsync_AddQuantity_ReturnsCorrectedQuantityInStock()
@@ -95,7 +96,7 @@ namespace Inventory.Application.Tests
             int id = await AddHandBagAsync(stock: 5);
 
             await Assert.ThrowsAsync<InsufficientStockException>(
-                () => _productService.ReduceInventoryAsync(id, 6));
+                async () =>await _productService.ReduceInventoryAsync(id, 6));
         }
 
         [Fact]
@@ -107,7 +108,7 @@ namespace Inventory.Application.Tests
 
             Product? reloaded = await _repository.GetByIdAsync(id);
             Assert.NotNull(reloaded);
-            Assert.Equal(3, reloaded.StockQty);
+            Assert.Equal(3, reloaded?.StockQty);
         }
 
     }

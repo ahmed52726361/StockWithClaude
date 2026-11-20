@@ -60,7 +60,7 @@ namespace Inventory.Application
                 {
                     OrderQty[item.ProductID] += item.OrderQuantity;
                 }
-                product.Sale(item.OrderQuantity);
+                //product.Sale(item.OrderQuantity);
 
                 SalesOrderLine line = new(
                     invoice,

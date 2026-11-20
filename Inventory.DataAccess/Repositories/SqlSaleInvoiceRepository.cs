@@ -46,7 +46,7 @@ public class SqlSaleInvoiceRepository
         SalesInvoice invoice = new(
             client,
             (DateTime)reader["InvoiceDate"]);
-
+        
         invoice.SetId((int)reader["SalesInvoiceID"]);
         invoice.SetStatus((SalesInvoice.Status)(byte)reader["PaidStatus"]);
 
@@ -78,6 +78,7 @@ public class SqlSaleInvoiceRepository
 
     public async Task<bool> DeleteAsync(int id)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id,0,nameof(id));
         const string query =
             "DELETE FROM SalesInvoices WHERE SalesInvoiceID = @Id";
 
@@ -94,6 +95,7 @@ public class SqlSaleInvoiceRepository
 
     public async Task<SalesInvoice?> GetByIdAsync(int id)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0,nameof(id));   
         return await QuerySingleAsync(
             SelectQuery + " WHERE si.SalesInvoiceID = @Id",
             new() { new("@Id", SqlDbType.Int, id) },

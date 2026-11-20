@@ -1,10 +1,11 @@
 ﻿using Inventory.Domain.Products;
 using Inventory.Domain.Repository_Interfaces;
 
-namespace Inventory.Application.Tests
+namespace Inventory.Application.Tests.FakeRepo
 {
     internal class FakeProductRepository : IProductRepository
     {
+        public bool ForceStockReductionToFail { get; set; }
         private readonly List<Product> _products = new();
         private int _nextId=1;
         private static Product Copy(Product source)
@@ -24,13 +25,13 @@ namespace Inventory.Application.Tests
         public  Task<Product?> FindByNameAsync(string name)
         {
             Product? stored=_products.FirstOrDefault(x =>string.Equals(x.Name,name,StringComparison.OrdinalIgnoreCase));
-            return  Task.FromResult<Product?>(stored is null ? null : Copy(stored));
+            return  Task.FromResult(stored is null ? null : Copy(stored));
         }
 
         public  Task<Product?> GetByIdAsync(int id)
         {
             Product? stored=_products.FirstOrDefault(x=>x.Id == id);
-            return  Task.FromResult<Product?>(stored is null ? null : Copy(stored));
+            return  Task.FromResult(stored is null ? null : Copy(stored));
         }
 
         public  Task<bool> UpdateAsync(Product product)
@@ -62,7 +63,7 @@ namespace Inventory.Application.Tests
                 .ToList();
             return Task.FromResult(result);
 
-        }
+        }   
         public Task<IReadOnlyList<Product>> GetAllAsync()
         {
             IReadOnlyList<Product> result=_products.Select(Copy).ToList();
@@ -71,6 +72,8 @@ namespace Inventory.Application.Tests
 
         public Task<bool> TryReduceStockAsync(int productId, int quantity)
         {
+            if (ForceStockReductionToFail)
+                return Task.FromResult(false);
             int index = _products.FindIndex(x => x.Id == productId);
 
             // Same as the SQL: 0 rows are changed if the product is missing or the stock is too low
