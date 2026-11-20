@@ -71,22 +71,6 @@ public class SqlSalesOrderLineRepository
         ); 
 
         SELECT CAST(SCOPE_IDENTITY() AS int);";
-        // we don't use it anymore 
-        /*
-         “Lines update the total with an update query” is the old design. Our two-phase flow adds the lines to the invoice before saving it,
-        so the invoice is inserted with the correct TotalAmount from the start. That is why the updateTotalQuery was left unused, 
-        and you can delete it.
-        
-        const string updateTotalQuery = @"
-        UPDATE SalesInvoices
-        SET TotalAmount =
-        (
-            SELECT COALESCE(SUM(OrderQty * OrderPrice), 0)
-            FROM SalesOrderLines
-            WHERE SalesInvoiceID = @SalesInvoiceID
-        )
-        WHERE SalesInvoiceID = @SalesInvoiceID;";
-        */
         List<QueryParameter> parameters = new()
     {
         new("@SalesInvoiceID", SqlDbType.Int, item.Invoice.Id),
