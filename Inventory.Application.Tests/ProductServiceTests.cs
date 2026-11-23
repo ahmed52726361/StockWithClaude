@@ -2,6 +2,7 @@
 using Inventory.Application.Tests.FakeRepo;
 using Inventory.Domain.Products;
 using Inventory.Domain.Products.Exceptions;
+using Inventory.TestDoubles.Products;
 
 namespace Inventory.Application.Tests
 {

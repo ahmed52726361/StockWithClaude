@@ -4,6 +4,7 @@ using Inventory.Domain.Orders.Invoices;
 using Inventory.Domain.Orders.Lines;
 using Inventory.Domain.Products;
 using Inventory.Domain.Products.Exceptions;
+using Inventory.TestDoubles.Products;
 
 namespace Inventory.Application.Tests
 {
@@ -259,7 +260,7 @@ namespace Inventory.Application.Tests
 
             // Phase 1 passes (5 >= 3), but the conditional update in Phase 2 reports "0 rows"
             _productRepository.ForceStockReductionToFail = true;
-
+             
             //Act + Assert
             await Assert.ThrowsAsync<InsufficientStockException>(
                 () => _salesTransactionService.SellProductsAsync(clientId, items));
