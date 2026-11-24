@@ -9,6 +9,7 @@ public class FakeProductRepository : IProductRepository
     private readonly List<Product> _products = new();
     private int _nextId = 1;
     public bool ForceStockReductionToFail { get; set; }
+    public bool SkipDuplicateNameCheck { get; set; }
 
     private static Product Copy(Product source)
     {
@@ -16,47 +17,45 @@ public class FakeProductRepository : IProductRepository
         copy.SetId(source.Id);
         return copy;
     }
+    private  Product ProductExists(string name)
+    {
+        Product? result = _products.FirstOrDefault(p =>
+    string.Equals(
+        p.Name,
+        name,
+        StringComparison.OrdinalIgnoreCase));
 
+        return result is null ? null : Copy(result);
+    }
     public Task<int> AddAsync(Product item)
     {
         ArgumentNullException.ThrowIfNull(item);
-
-        bool alreadyExists = _products.Any(p =>
-            string.Equals(
-                p.Name,
-                item.Name,
-                StringComparison.OrdinalIgnoreCase));
-
-        if (alreadyExists)
-            throw new DuplicateProductNameException(item.Name);
+        if (SkipDuplicateNameCheck==false)
+        {
+            if (ProductExists(item.Name)!=null)
+                throw new DuplicateProductNameException(item.Name);
+            
+        }
 
         int id = _nextId++;
 
         item.SetId(id);
         _products.Add(Copy(item));
+        SkipDuplicateNameCheck = false;
 
         return Task.FromResult(id);
     }
-
+    public Task<Product?> FindByNameAsync(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        Product? product = ProductExists(name);
+        return Task.FromResult(product);
+    }
     public Task<Product?> GetByIdAsync(int id)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(id, 0);
 
         Product? product = _products.FirstOrDefault(p => p.Id == id);
-
-        return Task.FromResult(
-            product is null ? null : Copy(product));
-    }
-
-    public Task<Product?> FindByNameAsync(string name)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(name);
-
-        Product? product = _products.FirstOrDefault(p =>
-            string.Equals(
-                p.Name,
-                name,
-                StringComparison.OrdinalIgnoreCase));
 
         return Task.FromResult(
             product is null ? null : Copy(product));

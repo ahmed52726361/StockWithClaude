@@ -44,6 +44,13 @@ namespace Inventory.Application.Tests
             await Assert.ThrowsAnyAsync<DuplicateProductNameException>(() => _productService.AddProductAsync("HandBag", 10m, 7));
         }
         [Fact]
+        public async Task AddProductAsync_ForceSkipDuplicateNameCheckSameNameDifferentCase_ThrowsDuplicateProductNameExceptionByFindMethod()
+        {
+            await _productService.AddProductAsync("handBag", 10m, 7);
+            _repository.SkipDuplicateNameCheck=true;
+            await Assert.ThrowsAnyAsync<DuplicateProductNameException>(() => _productService.AddProductAsync("HandBag", 10m, 7));
+        }
+        [Fact]
         public async Task AddProductAsync_EmptyName_ThrowsArgumentException()
         {
             await Assert.ThrowsAnyAsync<ArgumentException>(() => _productService.AddProductAsync(" ", 10m, 7));

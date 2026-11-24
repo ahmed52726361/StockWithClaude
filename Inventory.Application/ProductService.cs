@@ -9,7 +9,6 @@ namespace Inventory.Application
     public class ProductService
     {
         private readonly IProductRepository _productRepository;
-
         public ProductService(IProductRepository productRepository)
         {
             _productRepository = productRepository;
@@ -21,6 +20,7 @@ namespace Inventory.Application
         /// </exception>
         public async Task<int> AddProductAsync(string name, decimal price, int quantity)
         {
+            
             Product newProduct = new(name, price, quantity);
 
             Product? existingProduct = await _productRepository.FindByNameAsync(name);
